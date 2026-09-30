@@ -56,15 +56,15 @@ h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
 @keyframes blink{50%{opacity:.4}}
 .answer{animation:flip .7s cubic-bezier(.2,1.4,.4,1) both}
 @keyframes flip{from{opacity:0;transform:perspective(800px) rotateX(90deg)}}
-.answer .card{display:inline-block;padding:30px 70px 36px;border-radius:28px;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.03));
+.answer .card{display:inline-block;max-width:92%;padding:3vh 5vw 4vh;border-radius:28px;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.03));
  border:3px solid var(--gold);box-shadow:0 0 40px rgba(255,210,63,.45),0 0 0 8px rgba(255,210,63,.08)}
-.answer h2{font-family:Kanit,sans-serif;font-weight:800;font-size:clamp(48px,7vw,120px);line-height:1.15;text-shadow:0 5px 0 #7a1d5a}
-.answer.v .card{padding:18px 50px 22px}
-.answer.v h2{font-size:min(5vw,9vh)}
-.answer.v .artist{font-size:min(2.4vw,4.5vh)}
-.vid{margin:22px auto 0;height:min(40vh,30vw);aspect-ratio:16/9;border-radius:18px;overflow:hidden;border:3px solid var(--cyan);box-shadow:0 0 36px rgba(51,230,255,.45);background:#000}
-.vid iframe{width:100%;height:100%;border:0;display:block}
-.answer .artist{font-size:clamp(24px,3vw,48px);color:var(--cyan);margin-top:8px;font-weight:600;text-shadow:0 0 14px rgba(51,230,255,.6)}
+.answer h2{font-family:Kanit,sans-serif;font-weight:900;font-size:min(9vw,19vh);line-height:1.15;text-shadow:0 5px 0 #7a1d5a}
+.vid{position:fixed;left:0;bottom:0;width:320px;height:180px;opacity:0;pointer-events:none;z-index:-1}
+.vid iframe{width:100%;height:100%;border:0}
+.playing{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:26px;color:var(--cyan);font-weight:600;font-size:clamp(16px,1.8vw,28px);text-shadow:0 0 12px rgba(51,230,255,.6)}
+.playing .bars{height:34px;gap:5px}
+.playing .bars i{width:7px}
+.answer .artist{font-size:min(3.6vw,7vh);color:var(--cyan);margin-top:8px;font-weight:600;text-shadow:0 0 14px rgba(51,230,255,.6)}
 .qr{position:fixed;right:40px;bottom:36px;background:#fff;padding:10px;border-radius:14px;text-align:center;font-size:12px;color:#444;z-index:2;transition:opacity .3s;box-shadow:0 0 0 4px var(--pink),0 0 30px rgba(255,63,164,.6)}
 .qr.lg{padding:14px;font-size:15px;font-weight:600}
 .qr.lg canvas,.qr.lg img{width:190px!important;height:190px!important}
@@ -186,9 +186,9 @@ function render() {
     const badges = `<div class="badges"><span class="badge">${esc(s.gen)}</span><span class="badge lv-${esc(s.level)}">${esc(s.level)}</span>${s.lang !== "th-TH" ? `<span class="badge">สากล</span>` : ""}</div>`;
     if (st.phase === "answer") {
       const y = ytOf(s), v = y && st.music;
-      h = `<div class="slide answer ${v ? "v" : ""}"><p class="num">เฉลยเพลงที่ ${st.i + 1}</p><div class="divider"></div>
+      h = `<div class="slide answer"><p class="num">เฉลยเพลงที่ ${st.i + 1}</p><div class="divider"></div>
         <div class="card"><h2>${esc(s.title)}</h2><p class="artist">${esc(s.artist)}</p></div>
-        ${v ? `<div class="vid"><iframe src="https://www.youtube.com/embed/${y.id}?autoplay=1&start=${y.start}&rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>` : badges}</div>`;
+        ${v ? `<div class="playing"><div class="bars on">${"<i></i>".repeat(7)}</div>กำลังเล่นเพลง</div><div class="vid"><iframe src="https://www.youtube.com/embed/${y.id}?autoplay=1&start=${y.start}&rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>` : badges}</div>`;
     } else if (speaking || line >= 0) {
       h = st.showText
         ? `<div class="slide"><p class="num">เพลงที่ ${st.i + 1}</p><div class="divider"></div><div class="lyrics">${ls.map((x, k) => `<p class="${k < line ? "done" : k === line ? "on" : ""}">${esc(x)}</p>`).join("")}</div></div>`
