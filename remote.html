@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#12072b">
+<title>รีโมตทายเพลง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@800;900&family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{--bg:#12072b;--ink:#fff;--mute:#b7a6ea;--gold:#ffd23f;--pink:#ff3fa4;--cyan:#33e6ff;--green:#3dffa0;--red:#ff4d5e;--panel:rgba(255,255,255,.07);--line:rgba(183,166,234,.25)}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(ellipse at 50% 0%,#3a1080 0%,var(--bg) 60%) fixed;color:var(--ink);font-family:Prompt,sans-serif;padding:14px 16px 40px;max-width:520px;margin:0 auto;user-select:none;min-height:100vh}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.top h1{font-family:Kanit,sans-serif;font-weight:900;font-size:24px;background:linear-gradient(var(--gold),#ff8a1f);-webkit-background-clip:text;color:transparent}
+.st{font-size:12px;color:var(--mute)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#6b5a99;margin-right:5px}
+.dot.ok{background:var(--green);box-shadow:0 0 8px var(--green)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.now{border:2px solid var(--gold);box-shadow:0 0 20px rgba(255,210,63,.2)}
+.now small{color:var(--cyan);font-size:12px;letter-spacing:.15em;font-weight:600}
+.now h2{font-family:Kanit,sans-serif;font-size:24px;font-weight:800;margin-top:2px}
+.now p{color:var(--pink);font-weight:600}
+.tags{display:flex;gap:6px;margin-top:8px;font-size:12px}
+.tags span{border:1px solid var(--mute);border-radius:99px;padding:2px 10px;color:var(--mute)}
+.phase{font-size:13px;color:var(--mute);margin-top:8px}
+button{font:inherit;font-weight:600;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--ink);border-radius:14px;padding:14px 8px;font-size:16px;cursor:pointer;transition:transform .08s,box-shadow .08s;box-shadow:0 4px 0 rgba(0,0,0,.45)}
+button:active{transform:translateY(4px);box-shadow:none}
+button:disabled{opacity:.35}
+button.pri{background:linear-gradient(var(--gold),#ff9d2e);border:0;color:#2b0b00;box-shadow:0 5px 0 #a33b00}
+button.rose{background:linear-gradient(#ff6fbd,var(--pink));border:0;color:#fff;box-shadow:0 5px 0 #8a1d5a}
+button.on{background:rgba(51,230,255,.2);border-color:var(--cyan)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.big{padding:22px 8px;font-size:19px;font-family:Kanit,sans-serif;font-weight:800}
+.mt{margin-top:10px}
+.team{display:flex;align-items:center;gap:8px;margin-top:8px;padding:6px 6px 6px 12px;border-radius:14px;border:2px solid}
+.team:nth-child(1){border-color:var(--pink)}.team:nth-child(2){border-color:var(--cyan)}
+.team .nm{flex:1;font-weight:600}
+.team b{font-family:Kanit,sans-serif;font-size:28px;min-width:40px;text-align:center}
+.team:nth-child(1) b{color:var(--pink)}.team:nth-child(2) b{color:var(--cyan)}
+.team button{width:56px;padding:10px 0}
+.team button.pri{background:linear-gradient(#5dffb5,var(--green));color:#003a1f;box-shadow:0 5px 0 #0a7a45}
+label{font-size:13px;color:var(--mute);display:flex;align-items:center;gap:10px}
+input[type=range]{flex:1;accent-color:var(--gold)}
+details summary{cursor:pointer;font-size:15px;list-style:none;font-weight:600}
+details summary::after{content:" ▾";color:var(--mute)}
+.list{margin-top:10px;max-height:50vh;overflow:auto}
+.list div{display:flex;gap:10px;padding:10px 4px;border-top:1px solid var(--line);font-size:14px;cursor:pointer}
+.list div.cur{background:rgba(255,210,63,.15);border-radius:8px}
+.list i{font-style:normal;color:var(--mute);width:24px}
+.list em{font-style:normal;margin-left:auto;font-size:12px;color:var(--mute);white-space:nowrap}
+.off{position:fixed;inset:0;background:rgba(10,4,24,.95);display:grid;place-items:center;text-align:center;padding:24px;z-index:5}
+.off[hidden]{display:none}
+.off>div{width:100%;max-width:340px}
+.off h2{font-family:Kanit,sans-serif;font-weight:900;font-size:30px;background:linear-gradient(var(--gold),#ff8a1f);-webkit-background-clip:text;color:transparent}
+.off p{color:var(--mute);margin-top:6px;font-size:14px}
+.off .err{color:var(--red);min-height:1.4em;margin-top:10px}
+.off input{font-family:Kanit,sans-serif;font-weight:800;font-size:34px;letter-spacing:.25em;text-transform:lowercase;padding:12px 0 12px .25em;border:3px solid var(--gold);background:#0a0418;color:var(--gold);border-radius:16px;width:100%;text-align:center;margin-top:18px;outline:none;box-shadow:0 0 24px rgba(255,210,63,.3)}
+.off input::placeholder{color:#4a3d73;letter-spacing:.1em;font-size:22px}
+.off button{width:100%;margin-top:14px}
+.off .x{background:none;border:0;box-shadow:none;color:var(--mute);font-size:14px;font-weight:400}
+.st{cursor:pointer;padding:6px 10px;border:1px solid var(--line);border-radius:99px}
+</style>
+</head>
+<body>
+<div class="top"><h1>🎤 รีโมตทายเพลง</h1><div class="st" id="bCode" title="เปลี่ยนรหัส"><span class="dot" id="dot"></span><span id="stat">…</span></div></div>
+
+<div class="card now">
+  <small id="pos">—</small>
+  <h2 id="title">—</h2>
+  <p id="artist"></p>
+  <div class="tags" id="tags"></div>
+  <div class="phase" id="phase"></div>
+</div>
+
+<div class="card">
+  <div class="g2">
+    <button class="pri big" id="bRead">🔊 ให้บอทอ่าน</button>
+    <button class="rose big" data-c="next" id="bNext">✨ เฉลย</button>
+  </div>
+  <div class="g3 mt">
+    <button data-c="prev">◀ ย้อน</button>
+    <button id="bText">ซ่อนเนื้อ</button>
+    <button id="bMusic">🎵 หยุดเพลง</button>
+  </div>
+  <label class="mt" style="margin-top:12px">ความเร็วอ่าน <input type="range" id="rate" min="0.5" max="1.5" step="0.1"><span id="rv"></span></label>
+</div>
+
+<div class="card" id="teams"></div>
+
+<div class="card">
+  <details><summary>รายการเพลง</summary><div class="list" id="list"></div></details>
+</div>
+
+<div class="g2">
+  <button id="bFinal">🏆 สรุปคะแนน</button>
+  <button id="bReset">รีเซ็ตเกม</button>
+</div>
+
+<div class="off" id="off" hidden><div>
+  <h2>🔑 ใส่รหัสเกม</h2>
+  <p>ดูรหัส 6 ตัวที่มุมขวาล่างของจอเกม</p>
+  <input id="code" placeholder="เช่น e4alkh" maxlength="12" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go">
+  <div class="err" id="err"></div>
+  <button class="pri big" id="bJoin">เชื่อมต่อ</button>
+  <button class="x" id="bClose">ยกเลิก</button>
+</div></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let host = new URLSearchParams(location.search).get("id");
+let peer, conn, S = null, retry;
+const html = (el, h) => { if (el.dataset.h !== h) { el.dataset.h = h; el.innerHTML = h; } };
+
+const send = m => conn?.open && conn.send(m);
+const setStat = (ok, t) => { $("dot").classList.toggle("ok", ok); $("stat").textContent = t; };
+
+function connect() {
+  clearTimeout(retry);
+  if (!host) { openCode(); return; }
+  if (!peer || peer.destroyed) {
+    peer = new Peer();
+    peer.on("open", connect);
+    peer.on("disconnected", () => !peer.destroyed && peer.reconnect());
+    peer.on("error", e => {
+      if (e.type === "peer-unavailable") { setStat(false, "ไม่พบรหัสนี้"); openCode("ไม่พบเกมรหัส " + host.slice(6) + " — เช็กรหัสอีกที"); return; }
+      setStat(false, "ผิดพลาด"); retry = setTimeout(connect, 2500);
+    });
+    return;
+  }
+  if (!peer.open) return;
+  setStat(false, "กำลังเชื่อมต่อ…");
+  if (conn) { conn.off?.("close"); conn.close(); }
+  const c = conn = peer.connect(host, { reliable: true });
+  conn.on("open", () => { $("off").hidden = true; setStat(true, "เชื่อมต่อแล้ว"); send({ cmd: "hello" }); });
+  conn.on("data", d => { if (d?.type === "state") { S = d; draw(); } });
+  conn.on("close", () => { if (c !== conn) return; setStat(false, "หลุด · ต่อใหม่…"); retry = setTimeout(connect, 1500); });
+}
+
+function draw() {
+  const { st, song, n, teams, list, speaking, line } = S;
+  $("pos").textContent = st.i < 0 ? "หน้าเปิด" : st.i >= n ? "หน้าสรุปคะแนน" : `เพลงที่ ${st.i + 1} / ${n}`;
+  $("title").textContent = song ? song.title : st.i < 0 ? "พร้อมเริ่มเกม" : "จบเกม";
+  $("artist").textContent = song ? song.artist : "";
+  $("tags").innerHTML = song ? `<span>${esc(song.gen)}</span><span>${esc(song.level)}</span><span>${song.lines} บรรทัด</span>` : "";
+  $("phase").textContent = !song ? "" : st.phase === "answer" ? (song.yt ? (st.music ? "จอ: เฉลย + เล่นเพลง" : "จอ: เฉลย (หยุดเพลง)") : "จอ: เฉลย (ไม่มีลิงก์ YouTube)") : speaking ? `จอ: บอทกำลังอ่าน (${line + 1}/${song.lines})` : "จอ: ซ่อนคำตอบ";
+  $("bRead").textContent = speaking ? "⏹ หยุดอ่าน" : "🔊 ให้บอทอ่าน";
+  $("bRead").disabled = !song || !song.lines;
+  $("bNext").textContent = st.i < 0 ? "▶ เริ่มเกม" : st.i >= n ? "จบเกม" : st.phase === "answer" ? (st.i === n - 1 ? "🏆 สรุปคะแนน" : "เพลงถัดไป ▶") : "✨ เฉลย";
+  $("bNext").disabled = st.i >= n;
+  $("bMusic").textContent = st.music ? "🎵 หยุดเพลง" : "🎵 เล่นเพลง";
+  $("bMusic").disabled = !song || !song.yt || st.phase !== "answer";
+  $("bText").textContent = st.showText ? "ซ่อนเนื้อ" : "โชว์เนื้อ";
+  $("bText").classList.toggle("on", !st.showText);
+  $("rate").value = st.rate; $("rv").textContent = st.rate.toFixed(1) + "x";
+  html($("teams"), teams.map((t, k) => `<div class="team"><span class="nm">${esc(t)}</span>
+    <button data-s="${k}" data-d="-1">−1</button><b>${st.scores[k]}</b><button class="pri" data-s="${k}" data-d="1">+1</button></div>`).join(""));
+  html($("list"), list.map((s, k) => `<div data-g="${k}" class="${k === st.i ? "cur" : ""}"><i>${k + 1}</i><span>${esc(s.title)}</span><em>${esc(s.gen)} · ${esc(s.level)}</em></div>`).join(""));
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-c],[data-s],[data-g]"); if (!b) return;
+  if (b.dataset.c) send({ cmd: b.dataset.c });
+  else if (b.dataset.s) { send({ cmd: "score", team: +b.dataset.s, d: +b.dataset.d }); navigator.vibrate?.(30); }
+  else if (b.dataset.g) send({ cmd: "goto", i: +b.dataset.g });
+});
+$("bRead").onclick = () => send({ cmd: S?.speaking ? "stop" : "read" });
+$("bMusic").onclick = () => send({ cmd: "music" });
+$("bText").onclick = () => send({ cmd: "text" });
+$("rate").oninput = e => { $("rv").textContent = (+e.target.value).toFixed(1) + "x"; };
+$("rate").onchange = e => send({ cmd: "rate", v: +e.target.value });
+$("bFinal").onclick = () => S && send({ cmd: "goto", i: S.n });
+$("bReset").onclick = () => confirm("รีเซ็ตคะแนนและกลับหน้าแรก?") && send({ cmd: "reset" });
+function openCode(err = "") {
+  $("err").textContent = err; $("off").hidden = false;
+  $("bClose").hidden = !conn?.open;
+  if (host) $("code").value = host.replace(/^mewed-/, "");
+  setTimeout(() => $("code").focus(), 50);
+}
+function join() {
+  const c = $("code").value.trim().toLowerCase().replace(/\s/g, "");
+  if (!/^[a-z0-9]{4,}$/.test(c.replace(/^mewed-/, ""))) { $("err").textContent = "รหัสไม่ถูกต้อง"; return; }
+  host = c.startsWith("mewed-") ? c : "mewed-" + c;
+  history.replaceState(null, "", "?id=" + host);
+  $("err").textContent = ""; $("off").hidden = true; connect();
+}
+$("bJoin").onclick = join;
+$("code").onkeydown = e => e.key === "Enter" && join();
+$("bClose").onclick = () => { $("off").hidden = true; };
+$("bCode").onclick = () => openCode();
+document.addEventListener("visibilitychange", () => { if (!document.hidden && !conn?.open) connect(); });
+
+connect();
+</script>
+</body>
+</html>

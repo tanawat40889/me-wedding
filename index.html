@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ทายเพลงงานแต่ง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;800;900&family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="songs.js"></script>
+<style>
+:root{--bg:#12072b;--bg2:#2b0b63;--ink:#fff;--mute:#b7a6ea;--gold:#ffd23f;--pink:#ff3fa4;--cyan:#33e6ff;--green:#3dffa0;--red:#ff4d5e;--panel:rgba(255,255,255,.07)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:radial-gradient(ellipse at 50% 110%,#5b1aa8 0%,var(--bg2) 35%,var(--bg) 75%);color:var(--ink);font-family:Prompt,sans-serif;overflow:hidden}
+body::before{content:"";position:fixed;left:50%;top:115%;width:260vmax;height:260vmax;transform:translate(-50%,-50%);
+ background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.055) 0 6deg,transparent 6deg 18deg);animation:spin 60s linear infinite;pointer-events:none}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.frame{position:fixed;inset:14px;border-radius:26px;pointer-events:none;border:3px solid rgba(255,210,63,.35);
+ box-shadow:0 0 30px rgba(255,63,164,.25) inset,0 0 20px rgba(51,230,255,.15)}
+header{position:fixed;top:36px;left:48px;right:48px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.logo{font-family:Kanit,sans-serif;font-weight:900;font-size:clamp(18px,1.8vw,30px);letter-spacing:.02em;
+ background:linear-gradient(var(--gold),#ff9d2e);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #7a2a00)}
+.logo span{color:var(--pink);-webkit-text-fill-color:var(--pink)}
+.scores{display:flex;gap:14px}
+.team{display:flex;align-items:center;gap:12px;padding:6px 8px 6px 18px;border-radius:16px;background:var(--panel);border:2px solid;font-weight:600;font-size:clamp(13px,1.3vw,20px)}
+.team:nth-child(1){border-color:var(--pink);box-shadow:0 0 18px rgba(255,63,164,.4)}
+.team:nth-child(2){border-color:var(--cyan);box-shadow:0 0 18px rgba(51,230,255,.4)}
+.team b{font-family:Kanit,sans-serif;font-weight:800;font-size:1.9em;min-width:1.6em;text-align:center;padding:0 10px;border-radius:10px;background:#0a0418;line-height:1.3;transition:transform .25s cubic-bezier(.3,2,.5,1)}
+.team:nth-child(1) b{color:var(--pink);text-shadow:0 0 12px var(--pink)}
+.team:nth-child(2) b{color:var(--cyan);text-shadow:0 0 12px var(--cyan)}
+.team b.pop{transform:scale(1.6)}
+main{position:fixed;inset:0;display:grid;place-items:center;padding:120px 80px 90px;text-align:center}
+.slide{animation:in .55s cubic-bezier(.2,1.6,.4,1) both;width:100%;max-width:1400px}
+@keyframes in{from{opacity:0;transform:scale(.7)}}
+.script,.big,h1.script{font-family:Kanit,sans-serif;font-weight:900}
+h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
+ background:linear-gradient(180deg,#fff7c2 0%,var(--gold) 45%,#ff8a1f 100%);-webkit-background-clip:text;color:transparent;
+ filter:drop-shadow(0 6px 0 #8a1d5a) drop-shadow(0 0 30px rgba(255,63,164,.6))}
+.sub{font-size:clamp(18px,2vw,32px);color:var(--mute);margin-top:18px}
+.divider{height:18px}
+.num{font-family:Kanit,sans-serif;font-weight:600;font-size:clamp(18px,2vw,30px);letter-spacing:.35em;color:var(--cyan);text-shadow:0 0 12px rgba(51,230,255,.7)}
+.big{font-size:clamp(120px,17vw,300px);line-height:.95;color:var(--gold);
+ text-shadow:0 8px 0 #c2410c,0 14px 0 #7a1d5a,0 0 60px rgba(255,210,63,.6);animation:bounce 1.6s ease-in-out infinite}
+@keyframes bounce{50%{transform:translateY(-10px)}}
+.badges{display:flex;gap:12px;justify-content:center;margin-top:22px}
+.badge{padding:6px 20px;border-radius:99px;background:var(--panel);border:2px solid var(--mute);font-weight:600;font-size:clamp(14px,1.4vw,22px)}
+.lv-ง่าย{border-color:var(--green)!important;color:var(--green);box-shadow:0 0 14px rgba(61,255,160,.4)}
+.lv-กลาง{border-color:var(--gold)!important;color:var(--gold);box-shadow:0 0 14px rgba(255,210,63,.4)}
+.lv-ยาก{border-color:var(--red)!important;color:var(--red);box-shadow:0 0 14px rgba(255,77,94,.5)}
+.lyrics{font-size:clamp(26px,3.2vw,54px);line-height:1.6;font-weight:600}
+.lyrics p{transition:all .35s;opacity:.25;filter:blur(8px)}
+.lyrics p.done{opacity:.5;filter:none}
+.lyrics p.on{opacity:1;filter:none;color:var(--gold);transform:scale(1.08);text-shadow:0 0 24px rgba(255,210,63,.6)}
+.lyrics.plain p{opacity:1;filter:none}
+.bars{display:flex;gap:10px;justify-content:center;align-items:center;height:180px}
+.bars i{width:18px;border-radius:9px;height:20%;background:linear-gradient(var(--cyan),var(--pink));box-shadow:0 0 14px rgba(255,63,164,.6)}
+.bars.on i{animation:eq .9s ease-in-out infinite}
+.bars i:nth-child(2n){animation-delay:.2s}.bars i:nth-child(3n){animation-delay:.45s}.bars i:nth-child(5n){animation-delay:.1s}
+@keyframes eq{0%,100%{height:15%}50%{height:100%}}
+.hint{margin-top:26px;color:var(--mute);font-size:clamp(16px,1.6vw,26px);font-weight:600}
+.hint.hot{color:var(--pink);animation:blink .8s steps(2) infinite;text-shadow:0 0 12px var(--pink)}
+@keyframes blink{50%{opacity:.4}}
+.answer{animation:flip .7s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes flip{from{opacity:0;transform:perspective(800px) rotateX(90deg)}}
+.answer .card{display:inline-block;padding:30px 70px 36px;border-radius:28px;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.03));
+ border:3px solid var(--gold);box-shadow:0 0 40px rgba(255,210,63,.45),0 0 0 8px rgba(255,210,63,.08)}
+.answer h2{font-family:Kanit,sans-serif;font-weight:800;font-size:clamp(48px,7vw,120px);line-height:1.15;text-shadow:0 5px 0 #7a1d5a}
+.answer.v .card{padding:18px 50px 22px}
+.answer.v h2{font-size:min(5vw,9vh)}
+.answer.v .artist{font-size:min(2.4vw,4.5vh)}
+.vid{margin:22px auto 0;height:min(40vh,30vw);aspect-ratio:16/9;border-radius:18px;overflow:hidden;border:3px solid var(--cyan);box-shadow:0 0 36px rgba(51,230,255,.45);background:#000}
+.vid iframe{width:100%;height:100%;border:0;display:block}
+.answer .artist{font-size:clamp(24px,3vw,48px);color:var(--cyan);margin-top:8px;font-weight:600;text-shadow:0 0 14px rgba(51,230,255,.6)}
+.final{display:flex;gap:4vw;justify-content:center;margin-top:30px}
+.final div{position:relative;font-size:clamp(20px,2.4vw,38px);font-weight:600;padding:14px 50px;border-radius:24px;background:var(--panel);border:3px solid var(--mute)}
+.final b{display:block;font-family:Kanit,sans-serif;font-size:min(10vw,20vh);font-weight:900;color:var(--mute);line-height:1.1}
+.final .win{border-color:var(--gold);box-shadow:0 0 50px rgba(255,210,63,.6);transform:scale(1.1)}
+.final .win b{color:var(--gold);text-shadow:0 6px 0 #c2410c}
+.final .win::before{content:"👑";position:absolute;left:50%;top:-.9em;margin-left:-.5em;font-size:1.8em;animation:bounce 1.2s infinite}
+.qr{position:fixed;right:40px;bottom:36px;background:#fff;padding:10px;border-radius:14px;text-align:center;font-size:12px;color:#444;z-index:2;transition:opacity .3s;box-shadow:0 0 0 4px var(--pink),0 0 30px rgba(255,63,164,.6)}
+.qr.lg{padding:14px;font-size:15px;font-weight:600}
+.qr.lg canvas,.qr.lg img{width:190px!important;height:190px!important}
+.qr img,.qr canvas{display:block;margin:0 auto 6px}
+.qr .code{display:block;font-family:Kanit,sans-serif;font-weight:800;font-size:22px;letter-spacing:.15em;color:#2b0b63}
+.qr.hide{opacity:0;pointer-events:none}
+.status{position:fixed;left:48px;bottom:36px;font-size:13px;color:var(--mute);z-index:2}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#6b5a99;margin-right:6px}
+.dot.ok{background:var(--green);box-shadow:0 0 8px var(--green)}
+#start{position:fixed;inset:0;background:rgba(10,4,24,.88);display:grid;place-items:center;z-index:9;cursor:pointer;text-align:center}
+#start .go{display:inline-block;font-family:Kanit,sans-serif;font-weight:900;font-size:clamp(40px,6vw,90px);padding:16px 60px;border-radius:99px;color:#2b0b00;
+ background:linear-gradient(var(--gold),#ff8a1f);box-shadow:0 10px 0 #a33b00,0 0 60px rgba(255,210,63,.6);animation:bounce 1.2s infinite}
+#start small{display:block;color:var(--mute);margin-top:34px;font-size:14px;padding:0 24px}
+.cf{position:fixed;top:-20px;width:12px;height:18px;z-index:8;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translate(var(--dx),110vh) rotate(var(--r))}}
+</style>
+</head>
+<body>
+<div class="frame"></div>
+<header>
+  <div class="logo">🎤 ทายเพลง<span>!</span></div>
+  <div class="scores" id="scores"></div>
+</header>
+<main id="main"></main>
+<div class="qr" id="qr"><div id="qrc"></div><span id="qrtxt">สแกนเพื่อควบคุม</span></div>
+<div class="status"><span class="dot" id="dot"></span><span id="stat">กำลังเชื่อมต่อ…</span></div>
+<div id="start"><div><span class="go">▶ START</span><small>ต้องแตะ 1 ครั้งเพื่อเปิดเสียงบอท · คีย์บอร์ด: ← → เปลี่ยน · Space อ่าน · Enter เฉลย · T ซ่อน/โชว์เนื้อ</small></div></div>
+
+<script>
+const S = window.SONGS, T = window.TEAMS, N = S.length;
+const st = { i: -1, phase: "intro", showText: true, music: true, scores: T.map(() => 0), rate: 0.9 };
+let speaking = false, line = -1, heard = false, conns = [];
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const ytOf = s => {
+  const u = s?.yt || "", id = (u.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/) || u.match(/^([\w-]{11})$/) || [])[1];
+  if (!id) return null;
+  const t = u.match(/[?&](?:t|start)=(?:(\d+)m)?(\d+)s?/);
+  return { id, start: t ? (+t[1] || 0) * 60 + +t[2] : 0 };
+};
+const linesOf = s => (s.lyrics || "").split("\n").map(x => x.trim()).filter(Boolean);
+
+try { const sv = JSON.parse(localStorage.getItem("mew-state")); if (sv && sv.scores?.length === T.length) Object.assign(st, sv); } catch {}
+const save = () => { try { localStorage.setItem("mew-state", JSON.stringify(st)); } catch {} };
+
+// ---------- speech ----------
+let voices = [];
+const loadVoices = () => voices = speechSynthesis.getVoices();
+loadVoices(); speechSynthesis.onvoiceschanged = loadVoices;
+function stopRead() { speechSynthesis.cancel(); speaking = false; line = -1; }
+function read() {
+  const s = S[st.i]; if (!s) return;
+  const ls = linesOf(s); if (!ls.length) return;
+  stopRead(); st.phase = "intro"; speaking = true; heard = true;
+  const v = voices.find(v => v.lang.replace("_", "-") === s.lang) || voices.find(v => v.lang.startsWith(s.lang.slice(0, 2)));
+  const tok = {}; read.tok = tok;
+  const say = k => {
+    if (read.tok !== tok) return;
+    if (k >= ls.length) { speaking = false; line = -1; render(); return; }
+    line = k; render();
+    const u = new SpeechSynthesisUtterance(ls[k]);
+    u.lang = s.lang; if (v) u.voice = v; u.rate = st.rate; u.pitch = 1;
+    u.onend = () => setTimeout(() => say(k + 1), 350);
+    u.onerror = () => { if (read.tok === tok) { speaking = false; line = -1; render(); } };
+    speechSynthesis.speak(u);
+  };
+  say(0);
+}
+
+// ---------- navigation ----------
+function go(i) { stopRead(); heard = false; st.music = true; st.i = Math.max(-1, Math.min(N, i)); st.phase = "intro"; render(); }
+function next() {
+  if (st.i >= 0 && st.i < N && st.phase === "intro") { stopRead(); st.phase = "answer"; render(); }
+  else go(st.i + 1);
+}
+function prev() {
+  if (st.i >= 0 && st.i < N && st.phase === "answer") { st.phase = "intro"; render(); }
+  else go(st.i - 1);
+}
+function reveal() { if (st.i >= 0 && st.i < N) { stopRead(); st.phase = st.phase === "answer" ? "intro" : "answer"; st.music = true; render(); } }
+function score(t, d) {
+  if (st.scores[t] == null) return;
+  st.scores[t] = Math.max(0, st.scores[t] + d); render();
+  tone(d > 0 ? [880, 1320] : [300, 200], .1);
+  const b = document.querySelectorAll(".team b")[t]; b?.classList.add("pop"); setTimeout(() => b?.classList.remove("pop"), 300);
+}
+
+
+// ---------- fx ----------
+let ac, lastKey = "";
+function tone(fs, dur = .12, type = "square", vol = .08) {
+  try {
+    ac = ac || new AudioContext(); let t = ac.currentTime;
+    fs.forEach(f => { const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur); o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur); t += dur * .8; });
+  } catch {}
+}
+function confetti(n = 120) {
+  const cs = ["#ffd23f", "#ff3fa4", "#33e6ff", "#3dffa0", "#fff"];
+  for (let k = 0; k < n; k++) {
+    const e = document.createElement("i"); e.className = "cf";
+    e.style.cssText = `left:${Math.random() * 100}vw;background:${cs[k % cs.length]};--dx:${(Math.random() - .5) * 300}px;--r:${Math.random() * 1080}deg;animation-duration:${2 + Math.random() * 2.5}s;animation-delay:${Math.random() * .6}s;border-radius:${k % 3 ? 2 : 50}%`;
+    document.body.appendChild(e); setTimeout(() => e.remove(), 5500);
+  }
+}
+function fx() {
+  const key = st.i + st.phase; if (key === lastKey) return; lastKey = key;
+  if (st.i >= N) { confetti(260); tone([523, 659, 784, 1047, 1319], .18, "triangle", .12); }
+  else if (st.i >= 0 && st.phase === "answer") { confetti(); tone([784, 1047, 1319], .14, "triangle", .12); }
+  else if (st.i >= 0) tone([330, 440], .08);
+}
+
+// ---------- render ----------
+function render() {
+  save();
+  $("scores").innerHTML = T.map((t, k) => `<div class="team"><span>${esc(t)}</span><b>${st.scores[k]}</b></div>`).join("");
+  $("qr").classList.toggle("lg", st.i === -1);
+  const m = $("main");
+  let h;
+  if (st.i === -1) {
+    h = `<div class="slide"><p class="num">WEDDING GAME SHOW</p><h1 class="script">ทายเพลง<br>จากเนื้อร้อง</h1><div class="divider"></div>
+      <p class="sub">บอทจะอ่านเนื้อเพลง · ใครตอบชื่อเพลงถูกก่อน ได้คะแนน</p></div>`;
+  } else if (st.i >= N) {
+    const mx = Math.max(...st.scores), tie = st.scores.filter(x => x === mx).length > 1;
+    h = `<div class="slide"><p class="num">GAME OVER</p><h1 class="script">${tie ? "เสมอกัน!" : "ผู้ชนะ!"}</h1><div class="divider"></div>
+      <div class="final">${T.map((t, k) => `<div class="${!tie && st.scores[k] === mx ? "win" : ""}">${esc(t)}<b>${st.scores[k]}</b></div>`).join("")}</div></div>`;
+  } else {
+    const s = S[st.i], ls = linesOf(s);
+    const badges = `<div class="badges"><span class="badge">${esc(s.gen)}</span><span class="badge lv-${esc(s.level)}">${esc(s.level)}</span>${s.lang !== "th-TH" ? `<span class="badge">สากล</span>` : ""}</div>`;
+    if (st.phase === "answer") {
+      const y = ytOf(s), v = y && st.music;
+      h = `<div class="slide answer ${v ? "v" : ""}"><p class="num">เฉลยเพลงที่ ${st.i + 1}</p><div class="divider"></div>
+        <div class="card"><h2>${esc(s.title)}</h2><p class="artist">${esc(s.artist)}</p></div>
+        ${v ? `<div class="vid"><iframe src="https://www.youtube.com/embed/${y.id}?autoplay=1&start=${y.start}&rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>` : badges}</div>`;
+    } else if (speaking || line >= 0) {
+      h = st.showText
+        ? `<div class="slide"><p class="num">เพลงที่ ${st.i + 1}</p><div class="divider"></div><div class="lyrics">${ls.map((x, k) => `<p class="${k < line ? "done" : k === line ? "on" : ""}">${esc(x)}</p>`).join("")}</div></div>`
+        : `<div class="slide"><p class="num">เพลงที่ ${st.i + 1}</p><div class="divider"></div><div class="bars on">${"<i></i>".repeat(14)}</div><p class="hint">บอทกำลังอ่าน… บรรทัด ${line + 1}/${ls.length}</p></div>`;
+    } else {
+      h = `<div class="slide"><p class="num">เพลงที่</p><p class="big">${st.i + 1}</p><p class="num" style="margin-top:6px">จาก ${N}</p>${badges}
+        ${!ls.length ? `<p class="hint">⚠ ยังไม่ได้ใส่เนื้อเพลงใน songs.js</p>`
+          : heard && st.showText ? `<div class="lyrics plain" style="margin-top:30px;font-size:clamp(20px,2.4vw,40px)">${ls.map(x => `<p>${esc(x)}</p>`).join("")}</div>`
+          : `<p class="hint ${heard ? "hot" : ""}">${heard ? "🔔 ใครรู้แล้ว ยกมือเลย!" : "พร้อมฟังแล้วยัง?"}</p>`}</div>`;
+    }
+  }
+  if (m.dataset.h !== h) { m.dataset.h = h; m.innerHTML = h; }
+  fx();
+  broadcast();
+}
+
+// ---------- peer ----------
+function snapshot() {
+  const s = S[st.i];
+  return { type: "state", st, teams: T, n: N, speaking, line,
+    song: s ? { yt: !!ytOf(s), title: s.title, artist: s.artist, gen: s.gen, level: s.level, lines: linesOf(s).length } : null,
+    list: S.map(s => ({ title: s.title, level: s.level, gen: s.gen })) };
+}
+function broadcast() { const d = snapshot(); conns.forEach(c => c.open && c.send(d)); }
+function handle(m) {
+  switch (m.cmd) {
+    case "next": next(); break;
+    case "prev": prev(); break;
+    case "read": read(); break;
+    case "stop": stopRead(); render(); break;
+    case "text": st.showText = !st.showText; render(); break;
+    case "reveal": reveal(); break;
+    case "music": st.music = !st.music; render(); break;
+    case "score": score(m.team, m.d); break;
+    case "goto": go(m.i); break;
+    case "rate": st.rate = Math.min(1.5, Math.max(0.5, +m.v || 0.9)); render(); break;
+    case "reset": st.scores = T.map(() => 0); go(-1); break;
+    case "hello": broadcast(); break;
+  }
+}
+function updStat() {
+  const n = conns.filter(c => c.open).length;
+  $("dot").classList.toggle("ok", n > 0);
+  $("stat").textContent = n ? `รีโมตเชื่อมต่อแล้ว (${n})` : "รอรีโมต…";
+}
+function startPeer(fresh) {
+  let id = !fresh && localStorage.getItem("mew-peer");
+  if (!id) { id = "mewed-" + Math.random().toString(36).slice(2, 8); localStorage.setItem("mew-peer", id); }
+  const p = new Peer(id);
+  p.on("open", () => {
+    const url = new URL("remote.html", location.href); url.searchParams.set("id", id);
+    $("qrc").innerHTML = ""; new QRCode($("qrc"), { text: url.href, width: 150, height: 150 });
+    $("qrtxt").innerHTML = `สแกน หรือใส่รหัส<br><b class="code">${id.slice(6)}</b>`;
+    updStat();
+  });
+  p.on("connection", c => {
+    c.on("open", () => { conns.push(c); updStat(); c.send(snapshot()); });
+    c.on("data", handle);
+    c.on("close", () => { conns = conns.filter(x => x !== c); updStat(); });
+  });
+  p.on("disconnected", () => setTimeout(() => !p.destroyed && p.reconnect(), 1500));
+  p.on("error", e => {
+    if (e.type === "unavailable-id") { p.destroy(); startPeer(true); }
+    else { $("stat").textContent = "เชื่อมต่อไม่ได้: " + e.type; }
+  });
+}
+
+// ---------- keyboard ----------
+addEventListener("keydown", e => {
+  const k = e.key;
+  if (k === "ArrowRight" || k === "PageDown") next();
+  else if (k === "ArrowLeft" || k === "PageUp") prev();
+  else if (k === " ") { e.preventDefault(); speaking ? (stopRead(), render()) : read(); }
+  else if (k === "Enter") reveal();
+  else if (k === "t" || k === "T") { st.showText = !st.showText; render(); }
+  else if (k === "q" || k === "Q") $("qr").classList.toggle("hide");
+});
+$("start").onclick = () => { speechSynthesis.speak(new SpeechSynthesisUtterance("")); lastKey = st.i + st.phase; tone([523, 784], .1); $("start").remove(); };
+
+lastKey = st.i + st.phase; startPeer(); render();
+</script>
+</body>
+</html>
