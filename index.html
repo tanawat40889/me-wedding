@@ -23,14 +23,6 @@ header{position:fixed;top:36px;left:48px;right:48px;display:flex;justify-content
 .logo{font-family:Kanit,sans-serif;font-weight:900;font-size:clamp(18px,1.8vw,30px);letter-spacing:.02em;
  background:linear-gradient(var(--gold),#ff9d2e);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #7a2a00)}
 .logo span{color:var(--pink);-webkit-text-fill-color:var(--pink)}
-.scores{display:flex;gap:14px}
-.team{display:flex;align-items:center;gap:12px;padding:6px 8px 6px 18px;border-radius:16px;background:var(--panel);border:2px solid;font-weight:600;font-size:clamp(13px,1.3vw,20px)}
-.team:nth-child(1){border-color:var(--pink);box-shadow:0 0 18px rgba(255,63,164,.4)}
-.team:nth-child(2){border-color:var(--cyan);box-shadow:0 0 18px rgba(51,230,255,.4)}
-.team b{font-family:Kanit,sans-serif;font-weight:800;font-size:1.9em;min-width:1.6em;text-align:center;padding:0 10px;border-radius:10px;background:#0a0418;line-height:1.3;transition:transform .25s cubic-bezier(.3,2,.5,1)}
-.team:nth-child(1) b{color:var(--pink);text-shadow:0 0 12px var(--pink)}
-.team:nth-child(2) b{color:var(--cyan);text-shadow:0 0 12px var(--cyan)}
-.team b.pop{transform:scale(1.6)}
 main{position:fixed;inset:0;display:grid;place-items:center;padding:120px 80px 90px;text-align:center}
 .slide{animation:in .55s cubic-bezier(.2,1.6,.4,1) both;width:100%;max-width:1400px}
 @keyframes in{from{opacity:0;transform:scale(.7)}}
@@ -73,12 +65,6 @@ h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
 .vid{margin:22px auto 0;height:min(40vh,30vw);aspect-ratio:16/9;border-radius:18px;overflow:hidden;border:3px solid var(--cyan);box-shadow:0 0 36px rgba(51,230,255,.45);background:#000}
 .vid iframe{width:100%;height:100%;border:0;display:block}
 .answer .artist{font-size:clamp(24px,3vw,48px);color:var(--cyan);margin-top:8px;font-weight:600;text-shadow:0 0 14px rgba(51,230,255,.6)}
-.final{display:flex;gap:4vw;justify-content:center;margin-top:30px}
-.final div{position:relative;font-size:clamp(20px,2.4vw,38px);font-weight:600;padding:14px 50px;border-radius:24px;background:var(--panel);border:3px solid var(--mute)}
-.final b{display:block;font-family:Kanit,sans-serif;font-size:min(10vw,20vh);font-weight:900;color:var(--mute);line-height:1.1}
-.final .win{border-color:var(--gold);box-shadow:0 0 50px rgba(255,210,63,.6);transform:scale(1.1)}
-.final .win b{color:var(--gold);text-shadow:0 6px 0 #c2410c}
-.final .win::before{content:"👑";position:absolute;left:50%;top:-.9em;margin-left:-.5em;font-size:1.8em;animation:bounce 1.2s infinite}
 .qr{position:fixed;right:40px;bottom:36px;background:#fff;padding:10px;border-radius:14px;text-align:center;font-size:12px;color:#444;z-index:2;transition:opacity .3s;box-shadow:0 0 0 4px var(--pink),0 0 30px rgba(255,63,164,.6)}
 .qr.lg{padding:14px;font-size:15px;font-weight:600}
 .qr.lg canvas,.qr.lg img{width:190px!important;height:190px!important}
@@ -100,7 +86,6 @@ h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
 <div class="frame"></div>
 <header>
   <div class="logo">🎤 ทายเพลง<span>!</span></div>
-  <div class="scores" id="scores"></div>
 </header>
 <main id="main"></main>
 <div class="qr" id="qr"><div id="qrc"></div><span id="qrtxt">สแกนเพื่อควบคุม</span></div>
@@ -108,8 +93,8 @@ h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
 <div id="start"><div><span class="go">▶ START</span><small>ต้องแตะ 1 ครั้งเพื่อเปิดเสียงบอท · คีย์บอร์ด: ← → เปลี่ยน · Space อ่าน · Enter เฉลย · T ซ่อน/โชว์เนื้อ</small></div></div>
 
 <script>
-const S = window.SONGS, T = window.TEAMS, N = S.length;
-const st = { i: -1, phase: "intro", showText: true, music: true, scores: T.map(() => 0), rate: 0.9 };
+const S = window.SONGS, N = S.length;
+const st = { i: -1, phase: "intro", showText: true, music: true, rate: 0.9 };
 let speaking = false, line = -1, heard = false, conns = [];
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -121,7 +106,7 @@ const ytOf = s => {
 };
 const linesOf = s => (s.lyrics || "").split("\n").map(x => x.trim()).filter(Boolean);
 
-try { const sv = JSON.parse(localStorage.getItem("mew-state")); if (sv && sv.scores?.length === T.length) Object.assign(st, sv); } catch {}
+try { const sv = JSON.parse(localStorage.getItem("mew-state")); if (sv) Object.assign(st, sv, { i: Math.min(sv.i ?? -1, N) }); delete st.scores; } catch {}
 const save = () => { try { localStorage.setItem("mew-state", JSON.stringify(st)); } catch {} };
 
 // ---------- speech ----------
@@ -159,12 +144,6 @@ function prev() {
   else go(st.i - 1);
 }
 function reveal() { if (st.i >= 0 && st.i < N) { stopRead(); st.phase = st.phase === "answer" ? "intro" : "answer"; st.music = true; render(); } }
-function score(t, d) {
-  if (st.scores[t] == null) return;
-  st.scores[t] = Math.max(0, st.scores[t] + d); render();
-  tone(d > 0 ? [880, 1320] : [300, 200], .1);
-  const b = document.querySelectorAll(".team b")[t]; b?.classList.add("pop"); setTimeout(() => b?.classList.remove("pop"), 300);
-}
 
 
 // ---------- fx ----------
@@ -194,7 +173,6 @@ function fx() {
 // ---------- render ----------
 function render() {
   save();
-  $("scores").innerHTML = T.map((t, k) => `<div class="team"><span>${esc(t)}</span><b>${st.scores[k]}</b></div>`).join("");
   $("qr").classList.toggle("lg", st.i === -1);
   const m = $("main");
   let h;
@@ -202,9 +180,7 @@ function render() {
     h = `<div class="slide"><p class="num">WEDDING GAME SHOW</p><h1 class="script">ทายเพลง<br>จากเนื้อร้อง</h1><div class="divider"></div>
       <p class="sub">บอทจะอ่านเนื้อเพลง · ใครตอบชื่อเพลงถูกก่อน ได้คะแนน</p></div>`;
   } else if (st.i >= N) {
-    const mx = Math.max(...st.scores), tie = st.scores.filter(x => x === mx).length > 1;
-    h = `<div class="slide"><p class="num">GAME OVER</p><h1 class="script">${tie ? "เสมอกัน!" : "ผู้ชนะ!"}</h1><div class="divider"></div>
-      <div class="final">${T.map((t, k) => `<div class="${!tie && st.scores[k] === mx ? "win" : ""}">${esc(t)}<b>${st.scores[k]}</b></div>`).join("")}</div></div>`;
+    h = `<div class="slide"><p class="num">GAME OVER</p><h1 class="script">จบเกมแล้ว!</h1><div class="divider"></div><p class="sub">ขอบคุณทุกคนที่ร่วมสนุก 💕</p></div>`;
   } else {
     const s = S[st.i], ls = linesOf(s);
     const badges = `<div class="badges"><span class="badge">${esc(s.gen)}</span><span class="badge lv-${esc(s.level)}">${esc(s.level)}</span>${s.lang !== "th-TH" ? `<span class="badge">สากล</span>` : ""}</div>`;
@@ -232,7 +208,7 @@ function render() {
 // ---------- peer ----------
 function snapshot() {
   const s = S[st.i];
-  return { type: "state", st, teams: T, n: N, speaking, line,
+  return { type: "state", st, n: N, speaking, line,
     song: s ? { yt: !!ytOf(s), title: s.title, artist: s.artist, gen: s.gen, level: s.level, lines: linesOf(s).length } : null,
     list: S.map(s => ({ title: s.title, level: s.level, gen: s.gen })) };
 }
@@ -246,10 +222,9 @@ function handle(m) {
     case "text": st.showText = !st.showText; render(); break;
     case "reveal": reveal(); break;
     case "music": st.music = !st.music; render(); break;
-    case "score": score(m.team, m.d); break;
     case "goto": go(m.i); break;
     case "rate": st.rate = Math.min(1.5, Math.max(0.5, +m.v || 0.9)); render(); break;
-    case "reset": st.scores = T.map(() => 0); go(-1); break;
+    case "reset": go(-1); break;
     case "hello": broadcast(); break;
   }
 }

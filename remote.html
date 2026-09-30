@@ -88,15 +88,14 @@ details summary::after{content:" ▾";color:var(--mute)}
   <label class="mt" style="margin-top:12px">ความเร็วอ่าน <input type="range" id="rate" min="0.5" max="1.5" step="0.1"><span id="rv"></span></label>
 </div>
 
-<div class="card" id="teams"></div>
 
 <div class="card">
   <details><summary>รายการเพลง</summary><div class="list" id="list"></div></details>
 </div>
 
 <div class="g2">
-  <button id="bFinal">🏆 สรุปคะแนน</button>
-  <button id="bReset">รีเซ็ตเกม</button>
+  <button id="bFinal">🏁 จบเกม</button>
+  <button id="bReset">⏮ กลับหน้าแรก</button>
 </div>
 
 <div class="off" id="off" hidden><div>
@@ -141,30 +140,27 @@ function connect() {
 }
 
 function draw() {
-  const { st, song, n, teams, list, speaking, line } = S;
-  $("pos").textContent = st.i < 0 ? "หน้าเปิด" : st.i >= n ? "หน้าสรุปคะแนน" : `เพลงที่ ${st.i + 1} / ${n}`;
+  const { st, song, n, list, speaking, line } = S;
+  $("pos").textContent = st.i < 0 ? "หน้าเปิด" : st.i >= n ? "จบเกม" : `เพลงที่ ${st.i + 1} / ${n}`;
   $("title").textContent = song ? song.title : st.i < 0 ? "พร้อมเริ่มเกม" : "จบเกม";
   $("artist").textContent = song ? song.artist : "";
   $("tags").innerHTML = song ? `<span>${esc(song.gen)}</span><span>${esc(song.level)}</span><span>${song.lines} บรรทัด</span>` : "";
   $("phase").textContent = !song ? "" : st.phase === "answer" ? (song.yt ? (st.music ? "จอ: เฉลย + เล่นเพลง" : "จอ: เฉลย (หยุดเพลง)") : "จอ: เฉลย (ไม่มีลิงก์ YouTube)") : speaking ? `จอ: บอทกำลังอ่าน (${line + 1}/${song.lines})` : "จอ: ซ่อนคำตอบ";
-  $("bRead").textContent = speaking ? "⏹ หยุดอ่าน" : "🔊 ให้บอทอ่าน";
+  $("bRead").textContent = song && !song.lines ? "ยังไม่มีเนื้อเพลง" : speaking ? "⏹ หยุดอ่าน" : "🔊 ให้บอทอ่าน";
   $("bRead").disabled = !song || !song.lines;
-  $("bNext").textContent = st.i < 0 ? "▶ เริ่มเกม" : st.i >= n ? "จบเกม" : st.phase === "answer" ? (st.i === n - 1 ? "🏆 สรุปคะแนน" : "เพลงถัดไป ▶") : "✨ เฉลย";
+  $("bNext").textContent = st.i < 0 ? "▶ เริ่มเกม" : st.i >= n ? "จบเกม" : st.phase === "answer" ? (st.i === n - 1 ? "🏁 จบเกม" : "เพลงถัดไป ▶") : "✨ เฉลย";
   $("bNext").disabled = st.i >= n;
   $("bMusic").textContent = st.music ? "🎵 หยุดเพลง" : "🎵 เล่นเพลง";
   $("bMusic").disabled = !song || !song.yt || st.phase !== "answer";
   $("bText").textContent = st.showText ? "ซ่อนเนื้อ" : "โชว์เนื้อ";
   $("bText").classList.toggle("on", !st.showText);
   $("rate").value = st.rate; $("rv").textContent = st.rate.toFixed(1) + "x";
-  html($("teams"), teams.map((t, k) => `<div class="team"><span class="nm">${esc(t)}</span>
-    <button data-s="${k}" data-d="-1">−1</button><b>${st.scores[k]}</b><button class="pri" data-s="${k}" data-d="1">+1</button></div>`).join(""));
   html($("list"), list.map((s, k) => `<div data-g="${k}" class="${k === st.i ? "cur" : ""}"><i>${k + 1}</i><span>${esc(s.title)}</span><em>${esc(s.gen)} · ${esc(s.level)}</em></div>`).join(""));
 }
 
 document.addEventListener("click", e => {
-  const b = e.target.closest("[data-c],[data-s],[data-g]"); if (!b) return;
+  const b = e.target.closest("[data-c],[data-g]"); if (!b) return;
   if (b.dataset.c) send({ cmd: b.dataset.c });
-  else if (b.dataset.s) { send({ cmd: "score", team: +b.dataset.s, d: +b.dataset.d }); navigator.vibrate?.(30); }
   else if (b.dataset.g) send({ cmd: "goto", i: +b.dataset.g });
 });
 $("bRead").onclick = () => send({ cmd: S?.speaking ? "stop" : "read" });
@@ -173,7 +169,7 @@ $("bText").onclick = () => send({ cmd: "text" });
 $("rate").oninput = e => { $("rv").textContent = (+e.target.value).toFixed(1) + "x"; };
 $("rate").onchange = e => send({ cmd: "rate", v: +e.target.value });
 $("bFinal").onclick = () => S && send({ cmd: "goto", i: S.n });
-$("bReset").onclick = () => confirm("รีเซ็ตคะแนนและกลับหน้าแรก?") && send({ cmd: "reset" });
+$("bReset").onclick = () => send({ cmd: "reset" });
 function openCode(err = "") {
   $("err").textContent = err; $("off").hidden = false;
   $("bClose").hidden = !conn?.open;

@@ -26,11 +26,6 @@ for n, r in enumerate(rows[1:], 2):
                   "yt": yt})
 
 out = pathlib.Path(__file__).with_name("songs.js")
-teams = '["ทีมเจ้าบ่าว", "ทีมเจ้าสาว"]'
-if out.exists():
-    import re
-    m = re.search(r"window\.TEAMS\s*=\s*(\[.*?\]);", out.read_text(encoding="utf-8"))
-    if m: teams = m.group(1)
 out.write_text("// สร้างจาก " + src.name + " ด้วย import_songs.py\nwindow.SONGS = "
-               + json.dumps(songs, ensure_ascii=False, indent=1) + ";\n\n// ชื่อทีม\nwindow.TEAMS = " + teams + ";\n", encoding="utf-8")
+               + json.dumps(songs, ensure_ascii=False, indent=1) + ";\n", encoding="utf-8")
 print(f"✓ เขียน {len(songs)} เพลง → {out.name}")

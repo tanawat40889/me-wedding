@@ -37,7 +37,6 @@ for s in songs:
                 "lyrics": "\n".join(lines), "yt": s["yt"] or mt.get("yt", "")})
 
 dst = here / "songs.js"
-teams = re.search(r"window\.TEAMS\s*=\s*(\[.*?\]);", dst.read_text(encoding="utf-8")) if dst.exists() else None
 dst.write_text(f"// สร้างจาก {src.name} ด้วย import_txt.py\nwindow.SONGS = " + json.dumps(out, ensure_ascii=False, indent=1)
-               + ";\n\n// ชื่อทีม\nwindow.TEAMS = " + (teams.group(1) if teams else '["ทีมเจ้าบ่าว", "ทีมเจ้าสาว"]') + ";\n", encoding="utf-8")
+               + ";\n", encoding="utf-8")
 print(f"✓ {len(out)} เพลง → songs.js ({sum(1 for o in out if o['lyrics'])} เพลงมีเนื้อ)")
