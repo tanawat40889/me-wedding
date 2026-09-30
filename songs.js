@@ -1,4 +1,4 @@
-// รายการเพลงรัก — ใส่เนื้อเพลง: python3 import_txt.py love-songs.txt
+// สร้างจาก love-songs.txt ด้วย import_txt.py
 window.SONGS = [
  {
   "title": "คู่ชีวิต",
@@ -6,8 +6,8 @@ window.SONGS = [
   "gen": "วัยทำงาน",
   "level": "ง่าย",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=3mYVyVY-lU4",
-  "lyrics": ""
+  "lyrics": "เธอเพียงคนเดียวและเพียงเธอที่ต้องการ\nฉันจะทำทุกทุกทางด้วยวิญญาณและหัวใจ\nนั่นคือฉันจะรักเธอไม่ว่าเป็นเมื่อไรสถานใด\nทั้งหัวใจฉันมีเธอเพียงคนเดียว",
+  "yt": "https://www.youtube.com/watch?v=3mYVyVY-lU4"
  },
  {
   "title": "พิง",
@@ -15,8 +15,8 @@ window.SONGS = [
   "gen": "เด็ก",
   "level": "ง่าย",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=-tCPuOIeSHo",
-  "lyrics": ""
+  "lyrics": "อยากให้เธอลองรักเหมือนครั้งแรกที่เธอได้พบรัก\nและลืมทุกๆ อย่าง\nมองฉันที่หัวใจ ลองรักด้วยหัวใจ\nไม่ต้องกลัวหรอกนะเธอ\nรักฉัน เหมือนเธอไม่เคยเจ็บสักครั้ง\nและรู้เอาไว้ว่าคนที่ยืนข้างเธอ เกิดมาเพื่อจะรักเธอ\nไม่มีวันทำเธอเสียใจ",
+  "yt": "https://www.youtube.com/watch?v=-tCPuOIeSHo"
  },
  {
   "title": "เธอหมุนรอบฉัน ฉันหมุนรอบเธอ",
@@ -24,8 +24,8 @@ window.SONGS = [
   "gen": "วัยทำงาน",
   "level": "กลาง",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=T59Xl5AnCzw",
-  "lyrics": ""
+  "lyrics": "เมื่อดาวโคจรมาเจอะกัน\nฤดูก็เปลี่ยนผัน การหมุนก็ผันแปร\nเมื่อเธอกับฉันมาเจอะกัน ชีวิตก็เปลี่ยนผัน\nเปลี่ยนไปจากเดิม\nเปลี่ยนจังหวะหมุนของหัวใจให้ใกล้กัน",
+  "yt": "https://www.youtube.com/watch?v=T59Xl5AnCzw"
  },
  {
   "title": "รักแรกพบ",
@@ -33,8 +33,8 @@ window.SONGS = [
   "gen": "วัยทำงาน",
   "level": "กลาง",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=rc7KnQAh_1I",
-  "lyrics": ""
+  "lyrics": "แต่วันนึงฉันผ่านมาพบเธอตรงนั้น\nดวงใจ เป็นเดือดเป็นร้อนช่างทรมาน\nราวกับโดนมนต์แม่มดสะกดพลัน นาทีนั้น ฉันรักเธอทันใด",
+  "yt": "https://www.youtube.com/watch?v=rc7KnQAh_1I"
  },
  {
   "title": "สุขกันเถอะเรา",
@@ -42,8 +42,8 @@ window.SONGS = [
   "gen": "ผู้ใหญ่",
   "level": "ง่าย",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=5OkDc1KeeSg",
-  "lyrics": ""
+  "lyrics": "โลกคือละคร อย่าอาวรณ์เลย\nสุขทุกข์ยังเคย\nรับและเป็นเช่นกัน\nปล่อยไปตามบุญ\nและกรรมบันดาล\nอย่ามัวโศกศัลย์\nยิ้มสู้มันเป็นไร",
+  "yt": "https://www.youtube.com/watch?v=5OkDc1KeeSg"
  },
  {
   "title": "ปาฏิหาริย์",
@@ -51,8 +51,8 @@ window.SONGS = [
   "gen": "ผู้ใหญ่",
   "level": "กลาง",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=G44dKh11SBI",
-  "lyrics": ""
+  "lyrics": "น่าจะเจอกันมาตั้งนาน\nก่อนที่เธอจะเป็นของใคร\nอยากให้มันมีปาฏิหาริย์ให้ตัวฉันย้อนเวลากลับไป\nจะไม่ยอมให้เราคลาดกันฉันคงจะพบรักเธอก่อนใคร\nพบกันสายไป\nมันน่าเสียดาย\nปาฏิหาริย์ไม่มีจริง",
+  "yt": "https://www.youtube.com/watch?v=G44dKh11SBI"
  },
  {
   "title": "วิมานดิน",
@@ -60,8 +60,8 @@ window.SONGS = [
   "gen": "ผู้ใหญ่",
   "level": "ยาก",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=Y0A6XgBTr0Y",
-  "lyrics": ""
+  "lyrics": "ก่อนฟ้าจะสางก่อนจันทร์จะร้างแรมไกล\nยังอยู่กับเธอข้างเคียงกาย อยู่ในความฝัน\nฝากเสียงกระซิบ ฝากไปในสายลมผ่าน\nข้ามขอบราตรีที่ยาวนาน ให้เธอฝันดี",
+  "yt": "https://www.youtube.com/watch?v=Y0A6XgBTr0Y"
  },
  {
   "title": "L.O.V.E.",
@@ -69,8 +69,8 @@ window.SONGS = [
   "gen": "วัยทำงาน",
   "level": "ยาก",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=evKK44wC2mE",
-  "lyrics": ""
+  "lyrics": "รักนั้นคือเราดีใจ\nเวลาเรามาเจอกัน\nคิดถึงกันในเวลาไม่เจอกันเลย\nOh..Wanna See You\nOh..Missing You",
+  "yt": "https://www.youtube.com/watch?v=evKK44wC2mE"
  },
  {
   "title": "เพียงชายคนนี้ (ไม่ใช่ผู้วิเศษ)",
@@ -78,8 +78,8 @@ window.SONGS = [
   "gen": "วัยทำงาน",
   "level": "ง่าย",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=rmhxAc3dT_0",
-  "lyrics": ""
+  "lyrics": "โอบกอดฉันไว้\nหลับตาผ่อนคลายให้สมฤดี\nเราจะบินหนี\nข้ามน้ำทะเลและแดนกว้างใหญ่\nดาวพราวดั่งฝัน\nกลางคืนยาวนานรานหัวใจ\nปล่อยความเหงาไป\nทอดทิ้งใจ\nรักจะพาแต่เราไปสองคน",
+  "yt": "https://www.youtube.com/watch?v=rmhxAc3dT_0"
  },
  {
   "title": "รักคุณเข้าอีกแล้ว",
@@ -87,8 +87,8 @@ window.SONGS = [
   "gen": "เด็ก",
   "level": "กลาง",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=T5EpVzyVr4A",
-  "lyrics": ""
+  "lyrics": "มีเพลงเพลงนึงที่เคยร้องให้เธอฟัง\nแต่ไม่รู้ว่ายังจำได้หรือเปล่า\nวันและเวลาอาจจะหมุนและเวียนไป\nแต่ใจความในเพลงนั้นของเรา",
+  "yt": "https://www.youtube.com/watch?v=T5EpVzyVr4A"
  },
  {
   "title": "เหมือนเคย",
@@ -96,8 +96,8 @@ window.SONGS = [
   "gen": "วัยทำงาน",
   "level": "กลาง",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=94vAkI2AvNk",
-  "lyrics": ""
+  "lyrics": "ต่อให้โลกจะหมุนสักเท่าไร\nเธอยังคงสดใสอ่อนหวานเหมือนเคย\nต่อให้ใครจะสวยเท่าไร รู้ไหมว่าฉันเฉยๆ\nก็เพราะว่าเธอน่ารักทุกๆ วัน\nจนไม่อาจเปลี่ยนใจฉันที่มีให้เธอได้เลย\nฉันก็คงต้องบอก ฉันรักเธอ\nเหมือนเคย",
+  "yt": "https://www.youtube.com/watch?v=94vAkI2AvNk"
  },
  {
   "title": "การเดินทาง",
@@ -105,7 +105,7 @@ window.SONGS = [
   "gen": "เด็ก",
   "level": "ยาก",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=Jy35oa5oFoY",
-  "lyrics": ""
+  "lyrics": "สิ่งที่เราเรียนรู้ส่งเสริมต่อการก้าวเดิน\nเรื่องราวที่เราเผชิญอยู่ที่เราเข้าใจมันไหม\nเพียงการเดินทางเพียงหนึ่งสัปดาห์\nหนึ่งเดือน หนึ่งปี มันมีความหมาย\nทำให้เติบโตเรียนรู้เข้าใจได้มากกว่า",
+  "yt": "https://www.youtube.com/watch?v=Jy35oa5oFoY"
  }
 ];
