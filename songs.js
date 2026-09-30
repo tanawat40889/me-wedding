@@ -61,7 +61,7 @@ window.SONGS = [
   "level": "ยาก",
   "lang": "th-TH",
   "lyrics": "ก่อนฟ้าจะสางก่อนจันทร์จะร้างแรมไกล\nยังอยู่กับเธอข้างเคียงกาย อยู่ในความฝัน\nฝากเสียงกระซิบ ฝากไปในสายลมผ่าน\nข้ามขอบราตรีที่ยาวนาน ให้เธอฝันดี",
-  "yt": "https://www.youtube.com/watch?v=Y0A6XgBTr0Y&t=44"
+  "yt": "https://www.youtube.com/watch?v=Y0A6XgBTr0Y&t=102"
  },
  {
   "title": "L.O.V.E.",
