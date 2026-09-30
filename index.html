@@ -135,15 +135,16 @@ function read() {
 
 // ---------- navigation ----------
 function go(i) { stopRead(); heard = false; st.music = true; st.i = Math.max(-1, Math.min(N, i)); st.phase = "intro"; render(); }
+const canReveal = () => heard || !linesOf(S[st.i]).length;
 function next() {
-  if (st.i >= 0 && st.i < N && st.phase === "intro") { stopRead(); st.phase = "answer"; render(); }
+  if (st.i >= 0 && st.i < N && st.phase === "intro") { if (!canReveal()) return; stopRead(); st.phase = "answer"; render(); }
   else go(st.i + 1);
 }
 function prev() {
   if (st.i >= 0 && st.i < N && st.phase === "answer") { st.phase = "intro"; render(); }
   else go(st.i - 1);
 }
-function reveal() { if (st.i >= 0 && st.i < N) { stopRead(); st.phase = st.phase === "answer" ? "intro" : "answer"; st.music = true; render(); } }
+function reveal() { if (st.i >= 0 && st.i < N && (st.phase === "answer" || canReveal())) { stopRead(); st.phase = st.phase === "answer" ? "intro" : "answer"; st.music = true; render(); } }
 
 
 // ---------- fx ----------
@@ -209,7 +210,7 @@ function render() {
 // ---------- peer ----------
 function snapshot() {
   const s = S[st.i];
-  return { type: "state", st, qr: qrOn, n: N, speaking, line,
+  return { type: "state", st, qr: qrOn, n: N, speaking, line, canReveal: st.i >= 0 && st.i < N && canReveal(),
     song: s ? { yt: !!ytOf(s), title: s.title, artist: s.artist, gen: s.gen, level: s.level, lines: linesOf(s).length } : null,
     list: S.map(s => ({ title: s.title, level: s.level, gen: s.gen })) };
 }
