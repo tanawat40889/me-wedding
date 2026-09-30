@@ -5,7 +5,8 @@
   "gen": "วัยทำงาน",
   "level": "ง่าย",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=3mYVyVY-lU4"
+  "yt": "https://www.youtube.com/watch?v=3mYVyVY-lU4",
+  "mark": "1.40"
  },
  {
   "title": "พิง",
@@ -13,7 +14,8 @@
   "gen": "เด็ก",
   "level": "ง่าย",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=-tCPuOIeSHo"
+  "yt": "https://www.youtube.com/watch?v=-tCPuOIeSHo",
+  "mark": "0.58"
  },
  {
   "title": "เธอหมุนรอบฉัน ฉันหมุนรอบเธอ",
@@ -21,7 +23,8 @@
   "gen": "วัยทำงาน",
   "level": "กลาง",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=T59Xl5AnCzw"
+  "yt": "https://www.youtube.com/watch?v=T59Xl5AnCzw",
+  "mark": "0.48"
  },
  {
   "title": "รักแรกพบ",
@@ -29,7 +32,8 @@
   "gen": "วัยทำงาน",
   "level": "กลาง",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=rc7KnQAh_1I"
+  "yt": "https://www.youtube.com/watch?v=rc7KnQAh_1I",
+  "mark": "1.20"
  },
  {
   "title": "สุขกันเถอะเรา",
@@ -37,7 +41,8 @@
   "gen": "ผู้ใหญ่",
   "level": "ง่าย",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=5OkDc1KeeSg"
+  "yt": "https://www.youtube.com/watch?v=5OkDc1KeeSg",
+  "mark": "0.45"
  },
  {
   "title": "ปาฏิหาริย์",
@@ -45,7 +50,8 @@
   "gen": "ผู้ใหญ่",
   "level": "กลาง",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=G44dKh11SBI"
+  "yt": "https://www.youtube.com/watch?v=G44dKh11SBI",
+  "mark": "1.10"
  },
  {
   "title": "วิมานดิน",
@@ -53,7 +59,8 @@
   "gen": "ผู้ใหญ่",
   "level": "ยาก",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=Y0A6XgBTr0Y"
+  "yt": "https://www.youtube.com/watch?v=Y0A6XgBTr0Y",
+  "mark": "0.44"
  },
  {
   "title": "L.O.V.E.",
@@ -61,7 +68,8 @@
   "gen": "วัยทำงาน",
   "level": "ยาก",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=evKK44wC2mE"
+  "yt": "https://www.youtube.com/watch?v=evKK44wC2mE",
+  "mark": "1.40"
  },
  {
   "title": "เพียงชายคนนี้ (ไม่ใช่ผู้วิเศษ)",
@@ -69,7 +77,8 @@
   "gen": "วัยทำงาน",
   "level": "ง่าย",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=rmhxAc3dT_0"
+  "yt": "https://www.youtube.com/watch?v=rmhxAc3dT_0",
+  "mark": "0.45"
  },
  {
   "title": "รักคุณเข้าอีกแล้ว",
@@ -77,7 +86,8 @@
   "gen": "เด็ก",
   "level": "กลาง",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=T5EpVzyVr4A"
+  "yt": "https://www.youtube.com/watch?v=T5EpVzyVr4A",
+  "mark": "0.18"
  },
  {
   "title": "เหมือนเคย",
@@ -85,7 +95,8 @@
   "gen": "วัยทำงาน",
   "level": "กลาง",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=94vAkI2AvNk"
+  "yt": "https://www.youtube.com/watch?v=94vAkI2AvNk",
+  "mark": "1.25"
  },
  {
   "title": "การเดินทาง",
@@ -93,6 +104,7 @@
   "gen": "เด็ก",
   "level": "ยาก",
   "lang": "th-TH",
-  "yt": "https://www.youtube.com/watch?v=Jy35oa5oFoY"
+  "yt": "https://www.youtube.com/watch?v=Jy35oa5oFoY",
+  "mark": "1.28"
  }
 ]

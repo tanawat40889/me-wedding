@@ -189,10 +189,11 @@ function render() {
       h = `<div class="slide answer"><p class="num">เฉลยเพลงที่ ${st.i + 1}</p><div class="divider"></div>
         <div class="card"><h2>${esc(s.title)}</h2><p class="artist">${esc(s.artist)}</p></div>
         ${v ? `<div class="playing"><div class="bars on">${"<i></i>".repeat(7)}</div>กำลังเล่นเพลง</div><div class="vid"><iframe src="https://www.youtube.com/embed/${y.id}?autoplay=1&start=${y.start}&rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>` : badges}</div>`;
-    } else if (speaking || line >= 0) {
+    } else if (speaking || line >= 0 || (heard && ls.length)) {
+      const done = !speaking, hot = done ? `<p class="hint hot">🔔 ใครรู้แล้ว ยกมือเลย!</p>` : "";
       h = st.showText
-        ? `<div class="slide"><p class="num">เพลงที่ ${st.i + 1}</p><div class="divider"></div><div class="lyrics">${ls.map((x, k) => `<p class="${k < line ? "done" : k === line ? "on" : ""}">${esc(x)}</p>`).join("")}</div></div>`
-        : `<div class="slide"><p class="num">เพลงที่ ${st.i + 1}</p><div class="divider"></div><div class="bars on">${"<i></i>".repeat(14)}</div><p class="hint">บอทกำลังอ่าน… บรรทัด ${line + 1}/${ls.length}</p></div>`;
+        ? `<div class="slide"><p class="num">เพลงที่ ${st.i + 1}</p><div class="divider"></div><div class="lyrics ${done ? "plain" : ""}">${ls.map((x, k) => `<p class="${done ? "" : k < line ? "done" : k === line ? "on" : ""}">${esc(x)}</p>`).join("")}</div>${hot}</div>`
+        : `<div class="slide"><p class="num">เพลงที่ ${st.i + 1}</p><div class="divider"></div><div class="bars ${done ? "" : "on"}">${"<i></i>".repeat(14)}</div>${done ? hot : `<p class="hint">บอทกำลังอ่าน… บรรทัด ${line + 1}/${ls.length}</p>`}</div>`;
     } else {
       h = `<div class="slide"><p class="num">เพลงที่</p><p class="big">${st.i + 1}</p><p class="num" style="margin-top:6px">จาก ${N}</p>${badges}
         ${!ls.length ? `<p class="hint">⚠ ยังไม่ได้ใส่เนื้อเพลงใน songs.js</p>`

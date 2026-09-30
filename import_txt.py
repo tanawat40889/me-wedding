@@ -16,15 +16,24 @@ for raw in src.read_text(encoding="utf-8").replace("\r", "").split("\n"):
         if cur and cur["_lyr"]: cur = None
         continue
     m = re.match(r"(?i)youtube\s*:\s*(\S+)", line)
+    mk = re.match(r"(?i)mark\s*:\s*(\d+)[.:](\d{1,2})", line)
     l = re.match(r"เนื้อเพลง\s*:\s*(.*)", line)
-    if m and cur: cur["yt"] = m.group(1)
+    if mk and cur: cur["mark"] = f"{mk.group(1)}.{mk.group(2)}"
+    elif m and cur: cur["yt"] = m.group(1)
     elif l and cur:
         cur["_lyr"] = True
         if l.group(1): cur["lines"].append(l.group(1))
     elif cur and cur["_lyr"]: cur["lines"].append(line)
     else:
-        cur = {"title": line, "yt": "", "lines": [], "_lyr": False}
+        cur = {"title": line, "yt": "", "mark": "", "lines": [], "_lyr": False}
         songs.append(cur)
+
+def with_mark(url, mark):
+    # Mark แบบ นาที.วินาที เช่น 1.40 = 1 นาที 40 วินาที → &t=100
+    if not url or not mark: return url
+    mi, se = mark.split(".")
+    url = re.sub(r"[?&](t|start)=[^&]*", "", url)
+    return url + ("&" if "?" in url else "?") + f"t={int(mi) * 60 + int(se)}"
 
 out = []
 for s in songs:
@@ -34,7 +43,7 @@ for s in songs:
     if not lines: print(f"! '{s['title']}' ไม่มีเนื้อเพลง")
     out.append({"title": mt.get("title", s["title"]), "artist": mt.get("artist", ""), "gen": mt.get("gen", "วัยทำงาน"),
                 "level": mt.get("level", "กลาง"), "lang": mt.get("lang", "th-TH"),
-                "lyrics": "\n".join(lines), "yt": s["yt"] or mt.get("yt", "")})
+                "lyrics": "\n".join(lines), "yt": with_mark(s["yt"] or mt.get("yt", ""), s["mark"] or mt.get("mark", ""))})
 
 dst = here / "songs.js"
 dst.write_text(f"// สร้างจาก {src.name} ด้วย import_txt.py\nwindow.SONGS = " + json.dumps(out, ensure_ascii=False, indent=1)
