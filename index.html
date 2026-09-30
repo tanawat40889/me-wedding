@@ -95,7 +95,7 @@ h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
 <script>
 const S = window.SONGS, N = S.length;
 const st = { i: -1, phase: "intro", showText: true, music: true, rate: 0.9 };
-let speaking = false, line = -1, heard = false, conns = [];
+let qrOn = true, speaking = false, line = -1, heard = false, conns = [];
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const ytOf = s => {
@@ -174,11 +174,11 @@ function fx() {
 function render() {
   save();
   $("qr").classList.toggle("lg", st.i === -1);
+  $("qr").classList.toggle("hide", !qrOn);
   const m = $("main");
   let h;
   if (st.i === -1) {
-    h = `<div class="slide"><p class="num">WEDDING GAME SHOW</p><h1 class="script">ทายเพลง<br>จากเนื้อร้อง</h1><div class="divider"></div>
-      <p class="sub">บอทจะอ่านเนื้อเพลง · ใครตอบชื่อเพลงถูกก่อน ได้คะแนน</p></div>`;
+    h = `<div class="slide"><p class="num">WEDDING GAME SHOW</p><h1 class="script">ทายเพลง<br>จากเนื้อร้อง</h1><div class="divider"></div></div>`;
   } else if (st.i >= N) {
     h = `<div class="slide"><p class="num">GAME OVER</p><h1 class="script">จบเกมแล้ว!</h1><div class="divider"></div><p class="sub">ขอบคุณทุกคนที่ร่วมสนุก 💕</p></div>`;
   } else {
@@ -186,16 +186,16 @@ function render() {
     const badges = `<div class="badges"><span class="badge">${esc(s.gen)}</span><span class="badge lv-${esc(s.level)}">${esc(s.level)}</span>${s.lang !== "th-TH" ? `<span class="badge">สากล</span>` : ""}</div>`;
     if (st.phase === "answer") {
       const y = ytOf(s), v = y && st.music;
-      h = `<div class="slide answer"><p class="num">เฉลยเพลงที่ ${st.i + 1}</p><div class="divider"></div>
+      h = `<div class="slide answer"><p class="num">เฉลย</p><div class="divider"></div>
         <div class="card"><h2>${esc(s.title)}</h2><p class="artist">${esc(s.artist)}</p></div>
         ${v ? `<div class="playing"><div class="bars on">${"<i></i>".repeat(7)}</div>กำลังเล่นเพลง</div><div class="vid"><iframe src="https://www.youtube.com/embed/${y.id}?autoplay=1&start=${y.start}&rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>` : badges}</div>`;
     } else if (speaking || line >= 0 || (heard && ls.length)) {
       const done = !speaking, hot = done ? `<p class="hint hot">🔔 ใครรู้แล้ว ยกมือเลย!</p>` : "";
       h = st.showText
-        ? `<div class="slide"><p class="num">เพลงที่ ${st.i + 1}</p><div class="divider"></div><div class="lyrics ${done ? "plain" : ""}">${ls.map((x, k) => `<p class="${done ? "" : k < line ? "done" : k === line ? "on" : ""}">${esc(x)}</p>`).join("")}</div>${hot}</div>`
-        : `<div class="slide"><p class="num">เพลงที่ ${st.i + 1}</p><div class="divider"></div><div class="bars ${done ? "" : "on"}">${"<i></i>".repeat(14)}</div>${done ? hot : `<p class="hint">บอทกำลังอ่าน… บรรทัด ${line + 1}/${ls.length}</p>`}</div>`;
+        ? `<div class="slide"><div class="lyrics ${done ? "plain" : ""}">${ls.map((x, k) => `<p class="${done ? "" : k < line ? "done" : k === line ? "on" : ""}">${esc(x)}</p>`).join("")}</div>${hot}</div>`
+        : `<div class="slide"><div class="bars ${done ? "" : "on"}">${"<i></i>".repeat(14)}</div>${done ? hot : `<p class="hint">บอทกำลังอ่าน…</p>`}</div>`;
     } else {
-      h = `<div class="slide"><p class="num">เพลงที่</p><p class="big">${st.i + 1}</p><p class="num" style="margin-top:6px">จาก ${N}</p>${badges}
+      h = `<div class="slide"><p class="num">เพลงต่อไป</p><p class="big">♪</p>${badges}
         ${!ls.length ? `<p class="hint">⚠ ยังไม่ได้ใส่เนื้อเพลงใน songs.js</p>`
           : heard && st.showText ? `<div class="lyrics plain" style="margin-top:30px;font-size:clamp(20px,2.4vw,40px)">${ls.map(x => `<p>${esc(x)}</p>`).join("")}</div>`
           : `<p class="hint ${heard ? "hot" : ""}">${heard ? "🔔 ใครรู้แล้ว ยกมือเลย!" : "พร้อมฟังแล้วยัง?"}</p>`}</div>`;
@@ -209,7 +209,7 @@ function render() {
 // ---------- peer ----------
 function snapshot() {
   const s = S[st.i];
-  return { type: "state", st, n: N, speaking, line,
+  return { type: "state", st, qr: qrOn, n: N, speaking, line,
     song: s ? { yt: !!ytOf(s), title: s.title, artist: s.artist, gen: s.gen, level: s.level, lines: linesOf(s).length } : null,
     list: S.map(s => ({ title: s.title, level: s.level, gen: s.gen })) };
 }
@@ -226,6 +226,7 @@ function handle(m) {
     case "goto": go(m.i); break;
     case "rate": st.rate = Math.min(1.5, Math.max(0.5, +m.v || 0.9)); render(); break;
     case "reset": go(-1); break;
+    case "qr": qrOn = !qrOn; render(); break;
     case "hello": broadcast(); break;
   }
 }
@@ -245,7 +246,7 @@ function startPeer(fresh) {
     updStat();
   });
   p.on("connection", c => {
-    c.on("open", () => { conns.push(c); updStat(); c.send(snapshot()); });
+    c.on("open", () => { conns.push(c); qrOn = false; updStat(); render(); });
     c.on("data", handle);
     c.on("close", () => { conns = conns.filter(x => x !== c); updStat(); });
   });
@@ -264,7 +265,7 @@ addEventListener("keydown", e => {
   else if (k === " ") { e.preventDefault(); speaking ? (stopRead(), render()) : read(); }
   else if (k === "Enter") reveal();
   else if (k === "t" || k === "T") { st.showText = !st.showText; render(); }
-  else if (k === "q" || k === "Q") $("qr").classList.toggle("hide");
+  else if (k === "q" || k === "Q") { qrOn = !qrOn; render(); }
 });
 $("start").onclick = () => { speechSynthesis.speak(new SpeechSynthesisUtterance("")); lastKey = st.i + st.phase; tone([523, 784], .1); $("start").remove(); };
 
