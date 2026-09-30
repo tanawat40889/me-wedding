@@ -149,8 +149,8 @@ function draw() {
   $("phase").textContent = !song ? "" : st.phase === "answer" ? (song.yt ? (st.music ? "จอ: เฉลย + เล่นเพลง" : "จอ: เฉลย (หยุดเพลง)") : "จอ: เฉลย (ไม่มีลิงก์ YouTube)") : speaking ? `จอ: บอทกำลังอ่าน (${line + 1}/${song.lines})` : "จอ: ซ่อนคำตอบ";
   $("bRead").textContent = song && !song.lines ? "ยังไม่มีเนื้อเพลง" : speaking ? "⏹ หยุดอ่าน" : "🔊 ให้บอทอ่าน";
   $("bRead").disabled = !song || !song.lines;
-  $("bNext").textContent = st.i < 0 ? "▶ เริ่มเกม" : st.i >= n ? "จบเกม" : st.phase === "answer" ? (st.i === n - 1 ? "🏁 จบเกม" : "เพลงถัดไป ▶") : S.canReveal ? "✨ เฉลย" : "🔒 ให้บอทอ่านก่อน";
-  $("bNext").disabled = st.i >= n || (song && st.phase === "intro" && !S.canReveal);
+  $("bNext").textContent = st.i < 0 ? "▶ เริ่มเกม" : st.i >= n ? "จบเกม" : st.phase === "answer" ? (st.i === n - 1 ? "🏁 จบเกม" : "เพลงถัดไป ▶") : S.canReveal !== false ? "✨ เฉลย" : "🔒 ให้บอทอ่านก่อน";
+  $("bNext").disabled = st.i >= n || (song && st.phase === "intro" && S.canReveal === false);
   $("bMusic").textContent = st.music ? "🎵 หยุดเพลง" : "🎵 เล่นเพลง";
   $("bMusic").disabled = !song || !song.yt || st.phase !== "answer";
   $("bText").textContent = st.showText ? "ซ่อนเนื้อ" : "โชว์เนื้อ";
