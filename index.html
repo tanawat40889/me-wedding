@@ -36,11 +36,6 @@ h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
 .big{font-size:clamp(120px,17vw,300px);line-height:.95;color:var(--gold);
  text-shadow:0 8px 0 #c2410c,0 14px 0 #7a1d5a,0 0 60px rgba(255,210,63,.6);animation:bounce 1.6s ease-in-out infinite}
 @keyframes bounce{50%{transform:translateY(-10px)}}
-.badges{display:flex;gap:12px;justify-content:center;margin-top:22px}
-.badge{padding:6px 20px;border-radius:99px;background:var(--panel);border:2px solid var(--mute);font-weight:600;font-size:clamp(14px,1.4vw,22px)}
-.lv-ง่าย{border-color:var(--green)!important;color:var(--green);box-shadow:0 0 14px rgba(61,255,160,.4)}
-.lv-กลาง{border-color:var(--gold)!important;color:var(--gold);box-shadow:0 0 14px rgba(255,210,63,.4)}
-.lv-ยาก{border-color:var(--red)!important;color:var(--red);box-shadow:0 0 14px rgba(255,77,94,.5)}
 .lyrics{font-size:clamp(26px,3.2vw,54px);line-height:1.6;font-weight:600}
 .lyrics p{transition:all .35s;opacity:.25;filter:blur(8px)}
 .lyrics p.done{opacity:.5;filter:none}
@@ -64,6 +59,14 @@ h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
 .playing{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:26px;color:var(--cyan);font-weight:600;font-size:clamp(16px,1.8vw,28px);text-shadow:0 0 12px rgba(51,230,255,.6)}
 .playing .bars{height:34px;gap:5px}
 .playing .bars i{width:7px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:3vw;align-items:center;text-align:center}
+.split .card{max-width:100%;padding:3vh 3vw 4vh}
+.split .left{min-width:0}
+.split h2{font-size:min(5vw,13vh);overflow-wrap:anywhere}
+.split .artist{font-size:min(2.6vw,5.5vh)}
+.split .right{text-align:left;font-size:min(1.9vw,4.2vh);line-height:1.55;padding-left:3vw;border-left:3px solid rgba(255,210,63,.35)}
+#toast{position:fixed;left:50%;top:110px;transform:translateX(-50%);z-index:9;padding:12px 26px;border-radius:99px;background:var(--gold);color:#2b0b00;font-weight:600;font-size:18px;box-shadow:0 0 30px rgba(255,210,63,.6);animation:blink 1s steps(2) infinite}
+#toast[hidden]{display:none}
 .answer .artist{font-size:min(3.6vw,7vh);color:var(--cyan);margin-top:8px;font-weight:600;text-shadow:0 0 14px rgba(51,230,255,.6)}
 .qr{position:fixed;right:40px;bottom:36px;background:#fff;padding:10px;border-radius:14px;text-align:center;font-size:12px;color:#444;z-index:2;transition:opacity .3s;box-shadow:0 0 0 4px var(--pink),0 0 30px rgba(255,63,164,.6)}
 .qr.lg{padding:14px;font-size:15px;font-weight:600}
@@ -74,10 +77,6 @@ h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
 .status{position:fixed;left:48px;bottom:36px;font-size:13px;color:var(--mute);z-index:2}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#6b5a99;margin-right:6px}
 .dot.ok{background:var(--green);box-shadow:0 0 8px var(--green)}
-#start{position:fixed;inset:0;background:rgba(10,4,24,.88);display:grid;place-items:center;z-index:9;cursor:pointer;text-align:center}
-#start .go{display:inline-block;font-family:Kanit,sans-serif;font-weight:900;font-size:clamp(40px,6vw,90px);padding:16px 60px;border-radius:99px;color:#2b0b00;
- background:linear-gradient(var(--gold),#ff8a1f);box-shadow:0 10px 0 #a33b00,0 0 60px rgba(255,210,63,.6);animation:bounce 1.2s infinite}
-#start small{display:block;color:var(--mute);margin-top:34px;font-size:14px;padding:0 24px}
 .cf{position:fixed;top:-20px;width:12px;height:18px;z-index:8;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translate(var(--dx),110vh) rotate(var(--r))}}
 </style>
@@ -85,12 +84,12 @@ h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
 <body>
 <div class="frame"></div>
 <header>
-  <div class="logo">🎤 ทายเพลง<span>!</span></div>
+  <div class="logo">ทายเพลง<span>!</span></div>
 </header>
 <main id="main"></main>
 <div class="qr" id="qr"><div id="qrc"></div><span id="qrtxt">สแกนเพื่อควบคุม</span></div>
 <div class="status"><span class="dot" id="dot"></span><span id="stat">กำลังเชื่อมต่อ…</span></div>
-<div id="start"><div><span class="go">▶ START</span><small>ต้องแตะ 1 ครั้งเพื่อเปิดเสียงบอท · คีย์บอร์ด: ← → เปลี่ยน · Space อ่าน · Enter เฉลย · T ซ่อน/โชว์เนื้อ</small></div></div>
+<div id="toast" hidden>🔈 คลิกที่จอนี้ 1 ครั้งเพื่อเปิดเสียง</div>
 
 <script>
 const S = window.SONGS, N = S.length;
@@ -115,6 +114,7 @@ const loadVoices = () => voices = speechSynthesis.getVoices();
 loadVoices(); speechSynthesis.onvoiceschanged = loadVoices;
 function stopRead() { speechSynthesis.cancel(); speaking = false; line = -1; }
 function read() {
+  if (needUnlock()) return;
   const s = S[st.i]; if (!s) return;
   const ls = linesOf(s); if (!ls.length) return;
   stopRead(); st.phase = "intro"; speaking = true; heard = true;
@@ -184,19 +184,19 @@ function render() {
     h = `<div class="slide"><p class="num">GAME OVER</p><h1 class="script">จบเกมแล้ว!</h1><div class="divider"></div><p class="sub">ขอบคุณทุกคนที่ร่วมสนุก 💕</p></div>`;
   } else {
     const s = S[st.i], ls = linesOf(s);
-    const badges = `<div class="badges"><span class="badge">${esc(s.gen)}</span><span class="badge lv-${esc(s.level)}">${esc(s.level)}</span>${s.lang !== "th-TH" ? `<span class="badge">สากล</span>` : ""}</div>`;
     if (st.phase === "answer") {
       const y = ytOf(s), v = y && st.music;
-      h = `<div class="slide answer"><p class="num">เฉลย</p><div class="divider"></div>
+      h = `<div class="slide answer split"><div class="left"><p class="num">เฉลย</p><div class="divider"></div>
         <div class="card"><h2>${esc(s.title)}</h2><p class="artist">${esc(s.artist)}</p></div>
-        ${v ? `<div class="playing"><div class="bars on">${"<i></i>".repeat(7)}</div>กำลังเล่นเพลง</div><div class="vid"><iframe src="https://www.youtube.com/embed/${y.id}?autoplay=1&start=${y.start}&rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>` : badges}</div>`;
+        ${v ? `<div class="playing"><div class="bars on">${"<i></i>".repeat(7)}</div>กำลังเล่นเพลง</div><div class="vid"><iframe src="https://www.youtube.com/embed/${y.id}?autoplay=1&start=${y.start}&rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>` : ""}</div>
+        ${ls.length ? `<div class="right lyrics plain">${ls.map(x => `<p>${esc(x)}</p>`).join("")}</div>` : ""}</div>`;
     } else if (speaking || line >= 0 || (heard && ls.length)) {
       const done = !speaking, hot = done ? `<p class="hint hot">🔔 ใครรู้แล้ว ยกมือเลย!</p>` : "";
       h = st.showText
         ? `<div class="slide"><div class="lyrics ${done ? "plain" : ""}">${ls.map((x, k) => `<p class="${done ? "" : k < line ? "done" : k === line ? "on" : ""}">${esc(x)}</p>`).join("")}</div>${hot}</div>`
         : `<div class="slide"><div class="bars ${done ? "" : "on"}">${"<i></i>".repeat(14)}</div>${done ? hot : `<p class="hint">บอทกำลังอ่าน…</p>`}</div>`;
     } else {
-      h = `<div class="slide"><p class="num">เพลงต่อไป</p><p class="big">♪</p>${badges}
+      h = `<div class="slide"><p class="num">เพลงต่อไป</p><p class="big">♪</p>
         ${!ls.length ? `<p class="hint">⚠ ยังไม่ได้ใส่เนื้อเพลงใน songs.js</p>`
           : heard && st.showText ? `<div class="lyrics plain" style="margin-top:30px;font-size:clamp(20px,2.4vw,40px)">${ls.map(x => `<p>${esc(x)}</p>`).join("")}</div>`
           : `<p class="hint ${heard ? "hot" : ""}">${heard ? "🔔 ใครรู้แล้ว ยกมือเลย!" : "พร้อมฟังแล้วยัง?"}</p>`}</div>`;
@@ -211,8 +211,8 @@ function render() {
 function snapshot() {
   const s = S[st.i];
   return { type: "state", st, qr: qrOn, n: N, speaking, line, canReveal: st.i >= 0 && st.i < N && canReveal(),
-    song: s ? { yt: !!ytOf(s), title: s.title, artist: s.artist, gen: s.gen, level: s.level, lines: linesOf(s).length } : null,
-    list: S.map(s => ({ title: s.title, level: s.level, gen: s.gen })) };
+    song: s ? { yt: !!ytOf(s), title: s.title, artist: s.artist, lines: linesOf(s).length } : null,
+    list: S.map(s => ({ title: s.title })) };
 }
 function broadcast() { const d = snapshot(); conns.forEach(c => c.open && c.send(d)); }
 function handle(m) {
@@ -268,7 +268,11 @@ addEventListener("keydown", e => {
   else if (k === "t" || k === "T") { st.showText = !st.showText; render(); }
   else if (k === "q" || k === "Q") { qrOn = !qrOn; render(); }
 });
-$("start").onclick = () => { speechSynthesis.speak(new SpeechSynthesisUtterance("")); lastKey = st.i + st.phase; tone([523, 784], .1); $("start").remove(); };
+// เปิดเสียงเมื่อมีการคลิก/กดปุ่มบนจอนี้ครั้งแรก (เบราว์เซอร์บังคับ)
+const unlocked = () => !navigator.userActivation || navigator.userActivation.hasBeenActive;
+const unlock = () => { try { speechSynthesis.speak(new SpeechSynthesisUtterance("")); } catch {} $("toast").hidden = true; removeEventListener("pointerdown", unlock); removeEventListener("keydown", unlock); };
+addEventListener("pointerdown", unlock); addEventListener("keydown", unlock);
+function needUnlock() { if (unlocked()) return false; $("toast").hidden = false; return true; }
 
 lastKey = st.i + st.phase; startPeer(); render();
 </script>

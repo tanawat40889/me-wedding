@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # แปลงไฟล์ข้อความ -> songs.js   ใช้: python3 import_txt.py love-songs.txt
 # รูปแบบ: บรรทัดชื่อเพลง / "Youtube: ลิงก์" / "เนื้อเพลง: ..." ต่อด้วยบรรทัดเนื้อเพลง / เว้นบรรทัดว่างคั่นเพลง
-# ศิลปิน/วัย/ระดับ ดึงจาก songs-meta.json (จับคู่ด้วยชื่อเพลง)
+# ศิลปิน/ภาษา/Mark ดึงจาก songs-meta.json (จับคู่ด้วยชื่อเพลง)
 import json, re, sys, pathlib
 
 here = pathlib.Path(__file__).parent
@@ -25,7 +25,8 @@ for raw in src.read_text(encoding="utf-8").replace("\r", "").split("\n"):
         if l.group(1): cur["lines"].append(l.group(1))
     elif cur and cur["_lyr"]: cur["lines"].append(line)
     else:
-        cur = {"title": line, "yt": "", "mark": "", "lines": [], "_lyr": False}
+        t = re.split(r"(?i)\s+youtube\s*:\s*", line, maxsplit=1)
+        cur = {"title": t[0].strip(), "yt": t[1].strip() if len(t) > 1 else "", "mark": "", "lines": [], "_lyr": False}
         songs.append(cur)
 
 def with_mark(url, mark):
@@ -41,8 +42,8 @@ for s in songs:
     if not mt: print(f"! '{s['title']}' ไม่มีใน songs-meta.json → ใช้ค่าเริ่มต้น")
     lines = [p.strip() for x in s["lines"] for p in re.split(r"\s{2,}", x) if p.strip()]
     if not lines: print(f"! '{s['title']}' ไม่มีเนื้อเพลง")
-    out.append({"title": mt.get("title", s["title"]), "artist": mt.get("artist", ""), "gen": mt.get("gen", "วัยทำงาน"),
-                "level": mt.get("level", "กลาง"), "lang": mt.get("lang", "th-TH"),
+    out.append({"title": mt.get("title", s["title"]), "artist": mt.get("artist", ""),
+                "lang": mt.get("lang") or ("en-US" if re.fullmatch(r"[\x00-\x7f]+", "".join(lines)) else "th-TH"),
                 "lyrics": "\n".join(lines), "yt": with_mark(s["yt"] or mt.get("yt", ""), s["mark"] or mt.get("mark", ""))})
 
 dst = here / "songs.js"

@@ -65,7 +65,7 @@ details summary::after{content:" ▾";color:var(--mute)}
 </style>
 </head>
 <body>
-<div class="top"><h1>🎤 รีโมตทายเพลง</h1><div class="st" id="bCode" title="เปลี่ยนรหัส"><span class="dot" id="dot"></span><span id="stat">…</span></div></div>
+<div class="top"><h1>รีโมตทายเพลง</h1><div class="st" id="bCode" title="เปลี่ยนรหัส"><span class="dot" id="dot"></span><span id="stat">…</span></div></div>
 
 <div class="card now">
   <small id="pos">—</small>
@@ -145,7 +145,7 @@ function draw() {
   $("pos").textContent = st.i < 0 ? "หน้าเปิด" : st.i >= n ? "จบเกม" : `เพลงที่ ${st.i + 1} / ${n}`;
   $("title").textContent = song ? song.title : st.i < 0 ? "พร้อมเริ่มเกม" : "จบเกม";
   $("artist").textContent = song ? song.artist : "";
-  $("tags").innerHTML = song ? `<span>${esc(song.gen)}</span><span>${esc(song.level)}</span><span>${song.lines} บรรทัด</span>` : "";
+  $("tags").innerHTML = song ? `<span>${song.lines} บรรทัด</span>` : "";
   $("phase").textContent = !song ? "" : st.phase === "answer" ? (song.yt ? (st.music ? "จอ: เฉลย + เล่นเพลง" : "จอ: เฉลย (หยุดเพลง)") : "จอ: เฉลย (ไม่มีลิงก์ YouTube)") : speaking ? `จอ: บอทกำลังอ่าน (${line + 1}/${song.lines})` : "จอ: ซ่อนคำตอบ";
   $("bRead").textContent = song && !song.lines ? "ยังไม่มีเนื้อเพลง" : speaking ? "⏹ หยุดอ่าน" : "🔊 ให้บอทอ่าน";
   $("bRead").disabled = !song || !song.lines;
@@ -158,7 +158,7 @@ function draw() {
   $("bQr").textContent = S.qr ? "📱 ซ่อน QR" : "📱 แสดง QR";
   $("bQr").classList.toggle("on", S.qr);
   $("rate").value = st.rate; $("rv").textContent = st.rate.toFixed(1) + "x";
-  html($("list"), list.map((s, k) => `<div data-g="${k}" class="${k === st.i ? "cur" : ""}"><i>${k + 1}</i><span>${esc(s.title)}</span><em>${esc(s.gen)} · ${esc(s.level)}</em></div>`).join(""));
+  html($("list"), list.map((s, k) => `<div data-g="${k}" class="${k === st.i ? "cur" : ""}"><i>${k + 1}</i><span>${esc(s.title)}</span></div>`).join(""));
 }
 
 document.addEventListener("click", e => {
