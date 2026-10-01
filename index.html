@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;800;900&family=Prompt:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.youtube.com/iframe_api" async></script>
 <script>document.write('<script src="songs.js?v=' + Date.now() + '"><\/script>')</script>
 <style>
 :root{--bg:#12072b;--bg2:#2b0b63;--ink:#fff;--mute:#b7a6ea;--gold:#ffd23f;--pink:#ff3fa4;--cyan:#33e6ff;--green:#3dffa0;--red:#ff4d5e;--panel:rgba(255,255,255,.07)}
@@ -56,6 +57,9 @@ h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
 .answer h2{font-family:Kanit,sans-serif;font-weight:900;font-size:min(9vw,19vh);line-height:1.15;text-shadow:0 5px 0 #7a1d5a}
 .vid{position:fixed;left:0;bottom:0;width:240px;height:240px;opacity:.01;pointer-events:none;z-index:1}
 .vid iframe{width:100%;height:100%;border:0}
+.playing.wait{opacity:.5}
+#tapPlay{position:fixed;left:50%;bottom:12vh;transform:translateX(-50%);z-index:9;font:inherit;font-weight:800;font-size:28px;padding:16px 44px;border:0;border-radius:99px;cursor:pointer;color:#2b0b00;background:linear-gradient(var(--gold),#ff8a1f);box-shadow:0 8px 0 #a33b00,0 0 40px rgba(255,210,63,.6)}
+#tapPlay[hidden]{display:none}
 .playing{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:26px;color:var(--cyan);font-weight:600;font-size:clamp(16px,1.8vw,28px);text-shadow:0 0 12px rgba(51,230,255,.6)}
 .playing .bars{height:34px;gap:5px}
 .playing .bars i{width:7px}
@@ -92,6 +96,8 @@ h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
   <button class="fs" id="fs" title="เต็มจอ (F)">⛶ เต็มจอ</button>
 </header>
 <main id="main"></main>
+<div class="vid"><div id="ytp"></div></div>
+<button id="tapPlay" hidden>▶ แตะเพื่อเล่นเพลง</button>
 <div class="qr" id="qr"><div id="qrc"></div><span id="qrtxt">สแกนเพื่อควบคุม</span></div>
 <div class="status"><span class="dot" id="dot"></span><span id="stat">กำลังเชื่อมต่อ…</span></div>
 <div id="toast" hidden>🔈 คลิกที่จอนี้ 1 ครั้งเพื่อเปิดเสียง</div>
@@ -193,7 +199,7 @@ function render() {
       const y = ytOf(s), v = y && st.music;
       h = `<div class="slide answer split"><div class="left"><p class="num">เฉลย</p><div class="divider"></div>
         <div class="card"><h2>${esc(s.title)}</h2><p class="artist">${esc(s.artist)}</p></div>
-        ${v ? `<div class="playing"><div class="bars on">${"<i></i>".repeat(7)}</div>กำลังเล่นเพลง</div><div class="vid"><iframe id="yt" src="https://www.youtube.com/embed/${y.id}?autoplay=1&start=${y.start}&rel=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>` : ""}</div>
+        ${v ? `<div class="playing"><div class="bars on">${"<i></i>".repeat(7)}</div>กำลังเล่นเพลง</div>` : ""}</div>
         ${ls.length ? `<div class="right lyrics plain">${ls.map(x => `<p>${esc(x)}</p>`).join("")}</div>` : ""}</div>`;
     } else if (speaking || line >= 0 || (heard && ls.length)) {
       const done = !speaking, hot = done ? `<p class="hint hot">🔔 ใครรู้แล้ว ยกมือเลย!</p>` : "";
@@ -207,7 +213,8 @@ function render() {
           : `<p class="hint ${heard ? "hot" : ""}">${heard ? "🔔 ใครรู้แล้ว ยกมือเลย!" : "พร้อมฟังแล้วยัง?"}</p>`}</div>`;
     }
   }
-  if (m.dataset.h !== h) { m.dataset.h = h; m.innerHTML = h; hookYt(); }
+  if (m.dataset.h !== h) { m.dataset.h = h; m.innerHTML = h; updPlay(); }
+  syncMusic();
   fx();
   broadcast();
 }
@@ -229,6 +236,7 @@ function handle(m) {
     case "text": st.showText = !st.showText; render(); break;
     case "reveal": reveal(); break;
     case "music": st.music = !st.music; render(); break;
+    case "play": ytReady && (player.unMute(), player.playVideo()); break;
     case "goto": go(m.i); break;
     case "rate": st.rate = Math.min(1.5, Math.max(0.5, +m.v || 0.9)); render(); break;
     case "reset": go(-1); break;
@@ -288,26 +296,42 @@ addEventListener("keydown", e => {
 });
 // เปิดเสียงเมื่อมีการคลิก/กดปุ่มบนจอนี้ครั้งแรก (เบราว์เซอร์บังคับ)
 const unlocked = () => !navigator.userActivation || navigator.userActivation.hasBeenActive;
-const unlock = () => { try { speechSynthesis.speak(new SpeechSynthesisUtterance("")); } catch {} $("toast").hidden = true; removeEventListener("pointerdown", unlock); removeEventListener("keydown", unlock); };
+const unlock = () => { try { speechSynthesis.speak(new SpeechSynthesisUtterance("")); } catch {} prime(); $("toast").hidden = true; removeEventListener("pointerdown", unlock); removeEventListener("keydown", unlock); };
 addEventListener("pointerdown", unlock); addEventListener("keydown", unlock);
-// ---------- YouTube: สั่งเล่นซ้ำจนกว่าจะเล่นจริง (กันกรณี autoplay ไม่ติด เช่นตอนเต็มจอ) ----------
-let ytState = -1, ytTimer;
-const ytCmd = (func, args = []) => $("yt")?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args }), "*");
-function hookYt() {
-  clearInterval(ytTimer); ytState = -1;
-  const f = $("yt"); if (!f) return;
-  let n = 0;
-  const kick = () => {
-    f.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: "yt" }), "*");
-    if (ytState !== 1) { ytCmd("unMute"); ytCmd("playVideo"); }
-    if (++n > 20 || ytState === 1) clearInterval(ytTimer);
-  };
-  f.addEventListener("load", () => { kick(); ytTimer = setInterval(kick, 700); });
+// ---------- YouTube: player ตัวเดียวสร้างครั้งเดียว แล้วสลับเพลงด้วย loadVideoById ----------
+// สร้างและ "ปลุก" player ตอนคลิกจอครั้งแรก → เบราว์เซอร์จะยอมให้เล่นเสียงต่อ แม้อยู่โหมดเต็มจอ
+let player, ytReady = false, ytState = -1, ytWant = null, ytTimer, primed = false;
+window.onYouTubeIframeAPIReady = () => {
+  player = new YT.Player("ytp", { width: 240, height: 240,
+    playerVars: { playsinline: 1, rel: 0, controls: 0, disablekb: 1 },
+    events: { onReady: () => { ytReady = true; if (primed) prime(); syncMusic(); },
+              onStateChange: e => { ytState = e.data; updPlay(); } } });
+};
+function prime() {
+  primed = true;
+  if (!ytReady || ytWant) return;
+  const y = S.map(ytOf).find(Boolean); if (!y) return;
+  player.mute(); player.loadVideoById({ videoId: y.id, startSeconds: y.start });
+  setTimeout(() => { if (!ytWant) { player.pauseVideo(); player.unMute(); } }, 600);
 }
-addEventListener("message", e => {
-  if (!/youtube\.com$/.test(new URL(e.origin).hostname)) return;
-  try { const d = JSON.parse(e.data); const ps = d?.info?.playerState ?? (d.event === "onStateChange" ? d.info : undefined); if (typeof ps === "number") ytState = ps; } catch {}
-});
+function syncMusic() {
+  const s = S[st.i], y = st.i >= 0 && st.i < N && st.phase === "answer" && st.music ? ytOf(s) : null;
+  const key = y ? y.id + "@" + y.start : null;
+  if (!ytReady || key === ytWant) return;
+  ytWant = key; clearInterval(ytTimer); $("tapPlay").hidden = true;
+  if (!y) { player.stopVideo(); return; }
+  player.unMute(); player.setVolume(100);
+  player.loadVideoById({ videoId: y.id, startSeconds: y.start });
+  let n = 0;
+  ytTimer = setInterval(() => {
+    if (ytState === 1) return clearInterval(ytTimer);
+    player.unMute(); player.playVideo();
+    if (++n === 5) $("tapPlay").hidden = false;  // ~3.5 วิแล้วยังไม่เล่น → ให้แตะจอ
+    if (n > 20) clearInterval(ytTimer);
+  }, 700);
+}
+$("tapPlay").onclick = () => { if (ytReady) { player.unMute(); player.playVideo(); } };
+function updPlay() { if (ytState === 1) $("tapPlay").hidden = true; const el = document.querySelector(".playing"); if (el) el.classList.toggle("wait", ytState !== 1); }
 function needUnlock() { if (unlocked()) return false; $("toast").hidden = false; return true; }
 if (!unlocked()) $("toast").hidden = false;
 
