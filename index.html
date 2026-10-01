@@ -54,7 +54,7 @@ h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
 .answer .card{display:inline-block;max-width:92%;padding:3vh 5vw 4vh;border-radius:28px;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.03));
  border:3px solid var(--gold);box-shadow:0 0 40px rgba(255,210,63,.45),0 0 0 8px rgba(255,210,63,.08)}
 .answer h2{font-family:Kanit,sans-serif;font-weight:900;font-size:min(9vw,19vh);line-height:1.15;text-shadow:0 5px 0 #7a1d5a}
-.vid{position:fixed;left:0;bottom:0;width:320px;height:180px;opacity:0;pointer-events:none;z-index:-1}
+.vid{position:fixed;left:0;bottom:0;width:240px;height:240px;opacity:.01;pointer-events:none;z-index:1}
 .vid iframe{width:100%;height:100%;border:0}
 .playing{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:26px;color:var(--cyan);font-weight:600;font-size:clamp(16px,1.8vw,28px);text-shadow:0 0 12px rgba(51,230,255,.6)}
 .playing .bars{height:34px;gap:5px}
@@ -193,7 +193,7 @@ function render() {
       const y = ytOf(s), v = y && st.music;
       h = `<div class="slide answer split"><div class="left"><p class="num">เฉลย</p><div class="divider"></div>
         <div class="card"><h2>${esc(s.title)}</h2><p class="artist">${esc(s.artist)}</p></div>
-        ${v ? `<div class="playing"><div class="bars on">${"<i></i>".repeat(7)}</div>กำลังเล่นเพลง</div><div class="vid"><iframe src="https://www.youtube.com/embed/${y.id}?autoplay=1&start=${y.start}&rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>` : ""}</div>
+        ${v ? `<div class="playing"><div class="bars on">${"<i></i>".repeat(7)}</div>กำลังเล่นเพลง</div><div class="vid"><iframe id="yt" src="https://www.youtube.com/embed/${y.id}?autoplay=1&start=${y.start}&rel=0&playsinline=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>` : ""}</div>
         ${ls.length ? `<div class="right lyrics plain">${ls.map(x => `<p>${esc(x)}</p>`).join("")}</div>` : ""}</div>`;
     } else if (speaking || line >= 0 || (heard && ls.length)) {
       const done = !speaking, hot = done ? `<p class="hint hot">🔔 ใครรู้แล้ว ยกมือเลย!</p>` : "";
@@ -207,7 +207,7 @@ function render() {
           : `<p class="hint ${heard ? "hot" : ""}">${heard ? "🔔 ใครรู้แล้ว ยกมือเลย!" : "พร้อมฟังแล้วยัง?"}</p>`}</div>`;
     }
   }
-  if (m.dataset.h !== h) { m.dataset.h = h; m.innerHTML = h; }
+  if (m.dataset.h !== h) { m.dataset.h = h; m.innerHTML = h; hookYt(); }
   fx();
   broadcast();
 }
@@ -290,6 +290,24 @@ addEventListener("keydown", e => {
 const unlocked = () => !navigator.userActivation || navigator.userActivation.hasBeenActive;
 const unlock = () => { try { speechSynthesis.speak(new SpeechSynthesisUtterance("")); } catch {} $("toast").hidden = true; removeEventListener("pointerdown", unlock); removeEventListener("keydown", unlock); };
 addEventListener("pointerdown", unlock); addEventListener("keydown", unlock);
+// ---------- YouTube: สั่งเล่นซ้ำจนกว่าจะเล่นจริง (กันกรณี autoplay ไม่ติด เช่นตอนเต็มจอ) ----------
+let ytState = -1, ytTimer;
+const ytCmd = (func, args = []) => $("yt")?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args }), "*");
+function hookYt() {
+  clearInterval(ytTimer); ytState = -1;
+  const f = $("yt"); if (!f) return;
+  let n = 0;
+  const kick = () => {
+    f.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: "yt" }), "*");
+    if (ytState !== 1) { ytCmd("unMute"); ytCmd("playVideo"); }
+    if (++n > 20 || ytState === 1) clearInterval(ytTimer);
+  };
+  f.addEventListener("load", () => { kick(); ytTimer = setInterval(kick, 700); });
+}
+addEventListener("message", e => {
+  if (!/youtube\.com$/.test(new URL(e.origin).hostname)) return;
+  try { const d = JSON.parse(e.data); const ps = d?.info?.playerState ?? (d.event === "onStateChange" ? d.info : undefined); if (typeof ps === "number") ytState = ps; } catch {}
+});
 function needUnlock() { if (unlocked()) return false; $("toast").hidden = false; return true; }
 if (!unlocked()) $("toast").hidden = false;
 
