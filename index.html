@@ -291,6 +291,7 @@ const unlocked = () => !navigator.userActivation || navigator.userActivation.has
 const unlock = () => { try { speechSynthesis.speak(new SpeechSynthesisUtterance("")); } catch {} $("toast").hidden = true; removeEventListener("pointerdown", unlock); removeEventListener("keydown", unlock); };
 addEventListener("pointerdown", unlock); addEventListener("keydown", unlock);
 function needUnlock() { if (unlocked()) return false; $("toast").hidden = false; return true; }
+if (!unlocked()) $("toast").hidden = false;
 
 lastKey = st.i + st.phase; startPeer(); render();
 </script>
