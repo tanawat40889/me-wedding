@@ -65,6 +65,10 @@ h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
 .split h2{font-size:min(5vw,13vh);overflow-wrap:anywhere}
 .split .artist{font-size:min(2.6vw,5.5vh)}
 .split .right{text-align:left;font-size:min(1.9vw,4.2vh);line-height:1.55;padding-left:3vw;border-left:3px solid rgba(255,210,63,.35)}
+.fs{font:inherit;font-weight:600;font-size:15px;color:var(--ink);background:rgba(255,255,255,.08);border:2px solid var(--cyan);border-radius:99px;padding:8px 18px;cursor:pointer;box-shadow:0 0 14px rgba(51,230,255,.35);transition:opacity .3s}
+.fs:hover{background:rgba(51,230,255,.2)}
+:fullscreen .fs{opacity:0}
+:fullscreen .fs:hover{opacity:1}
 #toast{position:fixed;left:50%;top:110px;transform:translateX(-50%);z-index:9;padding:12px 26px;border-radius:99px;background:var(--gold);color:#2b0b00;font-weight:600;font-size:18px;box-shadow:0 0 30px rgba(255,210,63,.6);animation:blink 1s steps(2) infinite}
 #toast[hidden]{display:none}
 .answer .artist{font-size:min(3.6vw,7vh);color:var(--cyan);margin-top:8px;font-weight:600;text-shadow:0 0 14px rgba(51,230,255,.6)}
@@ -85,6 +89,7 @@ h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
 <div class="frame"></div>
 <header>
   <div class="logo">ทายเพลง<span>!</span></div>
+  <button class="fs" id="fs" title="เต็มจอ (F)">⛶ เต็มจอ</button>
 </header>
 <main id="main"></main>
 <div class="qr" id="qr"><div id="qrc"></div><span id="qrtxt">สแกนเพื่อควบคุม</span></div>
@@ -259,9 +264,22 @@ function startPeer(fresh) {
 }
 
 // ---------- keyboard ----------
+function toggleFs() {
+  const d = document;
+  if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+  else {
+    const el = d.documentElement, r = (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
+    r?.catch?.(() => { $("fs").textContent = "กด F11 (Mac: ⌃⌘F)"; setTimeout(updFs, 3000); });
+  }
+}
+const updFs = () => { $("fs").textContent = (document.fullscreenElement || document.webkitFullscreenElement) ? "✕ ออกจากเต็มจอ" : "⛶ เต็มจอ"; };
+$("fs").onclick = toggleFs;
+document.addEventListener("fullscreenchange", updFs); document.addEventListener("webkitfullscreenchange", updFs);
+
 addEventListener("keydown", e => {
   const k = e.key;
-  if (k === "ArrowRight" || k === "PageDown") next();
+  if (k === "f" || k === "F") toggleFs();
+  else if (k === "ArrowRight" || k === "PageDown") next();
   else if (k === "ArrowLeft" || k === "PageUp") prev();
   else if (k === " ") { e.preventDefault(); speaking ? (stopRead(), render()) : read(); }
   else if (k === "Enter") reveal();
