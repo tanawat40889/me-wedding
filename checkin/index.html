@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fdeef3">
+<title>เช็คชื่อรับไหว้</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;800&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--card:#fff;--ink:#4a3b45;--mute:#6b5765;--line:#f0d9e2;--accent:#ad4568;--ok:#2f7a5b;--okbg:#e6f6ee;--shadow:0 2px 6px rgba(217,112,143,.08),0 8px 24px rgba(180,140,200,.1)}
+*{box-sizing:border-box;margin:0}
+body{min-height:100vh;background:linear-gradient(160deg,#fdeef3 0%,#f3eafc 45%,#e8f6f1 100%) fixed;color:var(--ink);font-family:Prompt,system-ui,sans-serif;line-height:1.5;padding:0 16px 40px}
+.wrap{max-width:720px;margin:0 auto}
+header{padding:20px 0 12px;display:flex;align-items:center;gap:12px}
+header a{color:var(--accent);text-decoration:none;font-weight:500;font-size:14px;white-space:nowrap}
+h1{font-family:Kanit,sans-serif;font-weight:800;color:#a8426a;font-size:clamp(20px,5.6vw,26px);flex:1;white-space:nowrap}
+.who{font-size:13px;color:var(--mute);background:none;border:0;font:inherit;cursor:pointer;text-decoration:underline}
+.bar{position:sticky;top:0;z-index:2;padding:10px 0;background:linear-gradient(#fbeef5 70%,rgba(251,238,245,0))}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tab{font:inherit;border:2px solid var(--line);background:var(--card);border-radius:14px;padding:10px;cursor:pointer;color:var(--ink);text-align:center}
+.tab b{display:block;font-family:Kanit,sans-serif;font-weight:600;font-size:18px}
+.tab small{color:var(--mute);font-size:13px}
+.tab.on{border-color:var(--accent);background:#fff5f8}
+.tab.on b{color:var(--accent)}
+.prog{height:6px;border-radius:3px;background:var(--line);margin-top:6px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--ok);transition:width .3s}
+.tools{display:flex;gap:8px;margin-top:10px}
+.tools input{flex:1;min-width:0;font:inherit;font-size:16px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+.tools select{font:inherit;font-size:15px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+.list{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.g{display:flex;gap:12px;align-items:center;padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.g.in{background:var(--okbg);border-color:#bfe5d1;box-shadow:none}
+.seq{font-family:Kanit,sans-serif;font-weight:600;color:var(--mute);min-width:26px;text-align:center}
+.info{flex:1;min-width:0}
+.name{font-weight:600;font-size:17px;white-space:pre-line}
+.meta{font-size:13px;color:var(--mute);margin-top:2px}
+.note{font-size:13px;color:var(--accent);margin-top:2px}
+.when{font-size:13px;color:var(--ok);font-weight:500;margin-top:2px}
+.chk{flex:none;font:inherit;font-weight:600;font-size:15px;min-width:92px;min-height:48px;border-radius:12px;cursor:pointer;border:2px solid var(--accent);background:#fff;color:var(--accent)}
+.g.in .chk{border-color:var(--ok);background:var(--ok);color:#fff}
+.chk:disabled{opacity:.5}
+.empty{text-align:center;color:var(--mute);padding:30px 0}
+.status{font-size:12px;color:var(--mute);text-align:center;margin-top:16px}
+.gate{max-width:360px;margin:12vh auto 0;background:var(--card);border-radius:20px;padding:28px;box-shadow:var(--shadow);text-align:center}
+.gate h2{font-family:Kanit,sans-serif;font-weight:800;color:#a8426a;font-size:24px}
+.gate p{color:var(--mute);font-size:14px;margin-top:6px}
+.gate input{width:100%;font:inherit;font-size:20px;text-align:center;padding:12px;margin-top:14px;border:1px solid var(--line);border-radius:12px;color:var(--ink)}
+.gate input#pin{letter-spacing:.3em}
+.gate button{width:100%;margin-top:14px;font:inherit;font-weight:600;font-size:17px;padding:12px;border:0;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer}
+.err{color:#b3261e;font-size:14px;min-height:1.4em;margin-top:8px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><a href="../">← หน้าหลัก</a><h1>เช็คชื่อรับไหว้</h1><button class="who" id="who" hidden></button></header>
+
+  <form class="gate" id="gate" hidden>
+    <h2>สำหรับเจ้าหน้าที่</h2>
+    <p>ใส่รหัสเจ้าหน้าที่และชื่อของคุณ</p>
+    <input id="pin" inputmode="numeric" autocomplete="off" placeholder="รหัส" maxlength="12">
+    <input id="staff" autocomplete="off" placeholder="ชื่อเจ้าหน้าที่ (ไม่บังคับ)" maxlength="40">
+    <div class="err" id="err"></div>
+    <button type="submit">เข้าใช้งาน</button>
+  </form>
+
+  <section id="app" hidden>
+    <div class="bar">
+      <div class="tabs" id="tabs"></div>
+      <div class="tools">
+        <input id="q" type="search" placeholder="ค้นหาชื่อ" autocomplete="off">
+        <select id="f"><option value="all">ทั้งหมด</option><option value="no">ยังไม่มา</option><option value="yes">มาแล้ว</option></select>
+      </div>
+    </div>
+    <div class="list" id="list"></div>
+    <p class="status" id="status"></p>
+  </section>
+</div>
+
+<script>
+const API = "https://rinnjtfrrkoajknoldoy.supabase.co/rest/v1/rpc/";
+const KEY = "sb_publishable_KGScT2bjpcoiDDAJQAUpbA_AnHdXb8S";
+const SIDES = ["เจ้าสาว", "เจ้าบ่าว"];
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const store = { get: k => { try { return localStorage.getItem(k) || ""; } catch { return ""; } },
+                set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+
+let pin = store.get("ci-pin"), staff = store.get("ci-staff"), side = store.get("ci-side") || SIDES[0];
+let guests = [], busy = new Set(), timer, lastOk = 0;
+
+async function rpc(fn, body) {
+  const r = await fetch(API + fn, { method: "POST",
+    headers: { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_pin: pin, ...body }) });
+  const d = await r.json().catch(() => null);
+  if (!r.ok) throw Object.assign(new Error(d?.message || r.statusText), { bad: d?.code === "28000" });
+  return d;
+}
+
+async function load() {
+  try {
+    const d = await rpc("guests_list", {});
+    // อย่าทับรายการที่กำลังบันทึกอยู่
+    guests = d.map(g => busy.has(g.id) ? guests.find(x => x.id === g.id) || g : g);
+    lastOk = Date.now(); render();
+  } catch (e) {
+    if (e.bad) return logout("รหัสไม่ถูกต้อง");
+    $("status").textContent = "เชื่อมต่อไม่ได้ กำลังลองใหม่…";
+  }
+}
+
+async function toggle(id) {
+  const g = guests.find(x => x.id === id); if (!g || busy.has(id)) return;
+  const on = !g.arrived_at;
+  if (!on && !confirm(`ยกเลิกการเช็คชื่อ\n${g.name}?`)) return;
+  busy.add(id);
+  Object.assign(g, on ? { arrived_at: new Date().toISOString(), arrived_by: staff } : { arrived_at: null, arrived_by: "" });
+  render();
+  try { Object.assign(g, await rpc("guest_set", { p_id: id, p_arrived: on, p_by: staff })); }
+  catch (e) { alert("บันทึกไม่สำเร็จ ลองอีกครั้ง"); Object.assign(g, on ? { arrived_at: null, arrived_by: "" } : {}); }
+  busy.delete(id); render();
+}
+
+const time = t => new Date(t).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+
+function render() {
+  $("tabs").innerHTML = SIDES.map(s => {
+    const all = guests.filter(g => g.side === s), n = all.filter(g => g.arrived_at).length;
+    return `<button class="tab ${s === side ? "on" : ""}" data-side="${esc(s)}"><b>ฝั่ง${esc(s)}</b>
+      <small>มาแล้ว ${n} / ${all.length}</small><div class="prog"><i style="width:${all.length ? n / all.length * 100 : 0}%"></i></div></button>`;
+  }).join("");
+  const q = $("q").value.trim().toLowerCase(), f = $("f").value;
+  const rows = guests.filter(g => g.side === side
+    && (!q || (g.name + " " + g.relation).toLowerCase().includes(q))
+    && (f === "all" || (f === "yes") === !!g.arrived_at));
+  $("list").innerHTML = rows.length ? rows.map(g => `
+    <div class="g ${g.arrived_at ? "in" : ""}">
+      <div class="seq">${g.seq}</div>
+      <div class="info">
+        <div class="name">${esc(g.name)}</div>
+        <div class="meta">${[g.relation, `${g.gift} ${g.gift_qty} ชิ้น`].filter(Boolean).map(esc).join(" · ")}</div>
+        ${g.note ? `<div class="note">${esc(g.note)}</div>` : ""}
+        ${g.arrived_at ? `<div class="when">มาแล้ว ${time(g.arrived_at)}${g.arrived_by ? " · " + esc(g.arrived_by) : ""}</div>` : ""}
+      </div>
+      <button class="chk" data-id="${g.id}" ${busy.has(g.id) ? "disabled" : ""}>${g.arrived_at ? "✓ มาแล้ว" : "เช็คชื่อ"}</button>
+    </div>`).join("") : `<p class="empty">ไม่พบรายชื่อ</p>`;
+  $("status").textContent = lastOk ? `อัปเดตล่าสุด ${new Date(lastOk).toLocaleTimeString("th-TH")} · รีเฟรชอัตโนมัติ` : "";
+}
+
+function start() {
+  $("gate").hidden = true; $("app").hidden = false;
+  $("who").hidden = false; $("who").textContent = "ออก";
+  load(); clearInterval(timer); timer = setInterval(() => !document.hidden && load(), 4000);
+}
+function logout(msg = "") {
+  clearInterval(timer); pin = ""; store.set("ci-pin", "");
+  $("app").hidden = true; $("who").hidden = true; $("gate").hidden = false;
+  $("err").textContent = msg; $("staff").value = staff; $("pin").focus();
+}
+
+$("gate").onsubmit = async e => {
+  e.preventDefault();
+  pin = $("pin").value.trim(); staff = $("staff").value.trim();
+  if (!pin) return;
+  $("err").textContent = "กำลังตรวจสอบ…";
+  try { guests = await rpc("guests_list", {}); store.set("ci-pin", pin); store.set("ci-staff", staff); $("pin").value = ""; start(); }
+  catch (er) { $("err").textContent = er.bad ? "รหัสไม่ถูกต้อง" : "เชื่อมต่อไม่ได้ ลองอีกครั้ง"; }
+};
+$("who").onclick = () => logout();
+$("tabs").onclick = e => { const b = e.target.closest("[data-side]"); if (b) { side = b.dataset.side; store.set("ci-side", side); render(); } };
+$("list").onclick = e => { const b = e.target.closest("[data-id]"); if (b) toggle(+b.dataset.id); };
+$("q").oninput = render; $("f").onchange = render;
+document.addEventListener("visibilitychange", () => !document.hidden && pin && load());
+
+pin ? start() : logout();
+</script>
+</body>
+</html>
