@@ -3,339 +3,57 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ทายเพลงงานแต่ง</title>
+<meta name="theme-color" content="#12072b">
+<title>ME Wedding</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;800;900&family=Prompt:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://www.youtube.com/iframe_api" async></script>
-<script>document.write('<script src="songs.js?v=' + Date.now() + '"><\/script>')</script>
 <style>
-:root{--bg:#12072b;--bg2:#2b0b63;--ink:#fff;--mute:#b7a6ea;--gold:#ffd23f;--pink:#ff3fa4;--cyan:#33e6ff;--green:#3dffa0;--red:#ff4d5e;--panel:rgba(255,255,255,.07)}
+:root{--bg:#12072b;--bg2:#2b0b63;--ink:#fff;--mute:#b7a6ea;--gold:#ffd23f;--pink:#ff3fa4;--cyan:#33e6ff;--panel:rgba(255,255,255,.07);--line:rgba(183,166,234,.25)}
 *{box-sizing:border-box;margin:0}
-html,body{height:100%}
-body{background:radial-gradient(ellipse at 50% 110%,#5b1aa8 0%,var(--bg2) 35%,var(--bg) 75%);color:var(--ink);font-family:Prompt,sans-serif;overflow:hidden}
-body::before{content:"";position:fixed;left:50%;top:115%;width:260vmax;height:260vmax;transform:translate(-50%,-50%);
- background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.055) 0 6deg,transparent 6deg 18deg);animation:spin 60s linear infinite;pointer-events:none}
-@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
-.frame{position:fixed;inset:14px;border-radius:26px;pointer-events:none;border:3px solid rgba(255,210,63,.35);
- box-shadow:0 0 30px rgba(255,63,164,.25) inset,0 0 20px rgba(51,230,255,.15)}
-header{position:fixed;top:36px;left:48px;right:48px;display:flex;justify-content:space-between;align-items:center;z-index:2}
-.logo{font-family:Kanit,sans-serif;font-weight:900;font-size:clamp(18px,1.8vw,30px);letter-spacing:.02em;
- background:linear-gradient(var(--gold),#ff9d2e);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #7a2a00)}
-.logo span{color:var(--pink);-webkit-text-fill-color:var(--pink)}
-main{position:fixed;inset:0;display:grid;place-items:center;padding:120px 80px 90px;text-align:center}
-.slide{animation:in .55s cubic-bezier(.2,1.6,.4,1) both;width:100%;max-width:1400px}
-@keyframes in{from{opacity:0;transform:scale(.7)}}
-.script,.big,h1.script{font-family:Kanit,sans-serif;font-weight:900}
-h1.script{font-size:min(10vw,17vh);line-height:1;letter-spacing:-.01em;
- background:linear-gradient(180deg,#fff7c2 0%,var(--gold) 45%,#ff8a1f 100%);-webkit-background-clip:text;color:transparent;
- filter:drop-shadow(0 6px 0 #8a1d5a) drop-shadow(0 0 30px rgba(255,63,164,.6))}
-.sub{font-size:clamp(18px,2vw,32px);color:var(--mute);margin-top:18px}
-.divider{height:18px}
-.num{font-family:Kanit,sans-serif;font-weight:600;font-size:clamp(18px,2vw,30px);letter-spacing:.35em;color:var(--cyan);text-shadow:0 0 12px rgba(51,230,255,.7)}
-.big{font-size:clamp(120px,17vw,300px);line-height:.95;color:var(--gold);
- text-shadow:0 8px 0 #c2410c,0 14px 0 #7a1d5a,0 0 60px rgba(255,210,63,.6);animation:bounce 1.6s ease-in-out infinite}
-@keyframes bounce{50%{transform:translateY(-10px)}}
-.lyrics{font-size:clamp(26px,3.2vw,54px);line-height:1.6;font-weight:600}
-.lyrics p{transition:all .35s;opacity:.25;filter:blur(8px)}
-.lyrics p.done{opacity:.5;filter:none}
-.lyrics p.on{opacity:1;filter:none;color:var(--gold);transform:scale(1.08);text-shadow:0 0 24px rgba(255,210,63,.6)}
-.lyrics.plain p{opacity:1;filter:none}
-.bars{display:flex;gap:10px;justify-content:center;align-items:center;height:180px}
-.bars i{width:18px;border-radius:9px;height:20%;background:linear-gradient(var(--cyan),var(--pink));box-shadow:0 0 14px rgba(255,63,164,.6)}
-.bars.on i{animation:eq .9s ease-in-out infinite}
-.bars i:nth-child(2n){animation-delay:.2s}.bars i:nth-child(3n){animation-delay:.45s}.bars i:nth-child(5n){animation-delay:.1s}
-@keyframes eq{0%,100%{height:15%}50%{height:100%}}
-.hint{margin-top:26px;color:var(--mute);font-size:clamp(16px,1.6vw,26px);font-weight:600}
-.hint.hot{color:var(--pink);animation:blink .8s steps(2) infinite;text-shadow:0 0 12px var(--pink)}
-@keyframes blink{50%{opacity:.4}}
-.answer{animation:flip .7s cubic-bezier(.2,1.4,.4,1) both}
-@keyframes flip{from{opacity:0;transform:perspective(800px) rotateX(90deg)}}
-.answer .card{display:inline-block;max-width:92%;padding:3vh 5vw 4vh;border-radius:28px;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.03));
- border:3px solid var(--gold);box-shadow:0 0 40px rgba(255,210,63,.45),0 0 0 8px rgba(255,210,63,.08)}
-.answer h2{font-family:Kanit,sans-serif;font-weight:900;font-size:min(9vw,19vh);line-height:1.15;text-shadow:0 5px 0 #7a1d5a}
-.vid{position:fixed;left:0;bottom:0;width:240px;height:240px;opacity:.01;pointer-events:none;z-index:1}
-.vid iframe{width:100%;height:100%;border:0}
-.playing.wait{opacity:.5}
-#tapPlay{position:fixed;left:50%;bottom:12vh;transform:translateX(-50%);z-index:9;font:inherit;font-weight:800;font-size:28px;padding:16px 44px;border:0;border-radius:99px;cursor:pointer;color:#2b0b00;background:linear-gradient(var(--gold),#ff8a1f);box-shadow:0 8px 0 #a33b00,0 0 40px rgba(255,210,63,.6)}
-#tapPlay[hidden]{display:none}
-.playing{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:26px;color:var(--cyan);font-weight:600;font-size:clamp(16px,1.8vw,28px);text-shadow:0 0 12px rgba(51,230,255,.6)}
-.playing .bars{height:34px;gap:5px}
-.playing .bars i{width:7px}
-.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:3vw;align-items:center;text-align:center}
-.split .card{max-width:100%;padding:3vh 3vw 4vh}
-.split .left{min-width:0}
-.split h2{font-size:min(5vw,13vh);overflow-wrap:anywhere}
-.split .artist{font-size:min(2.6vw,5.5vh)}
-.split .right{text-align:left;font-size:min(1.9vw,4.2vh);line-height:1.55;padding-left:3vw;border-left:3px solid rgba(255,210,63,.35)}
-.fs{font:inherit;font-weight:600;font-size:15px;color:var(--ink);background:rgba(255,255,255,.08);border:2px solid var(--cyan);border-radius:99px;padding:8px 18px;cursor:pointer;box-shadow:0 0 14px rgba(51,230,255,.35);transition:opacity .3s}
-.fs:hover{background:rgba(51,230,255,.2)}
-:fullscreen .fs{opacity:0}
-:fullscreen .fs:hover{opacity:1}
-#toast{position:fixed;left:50%;top:110px;transform:translateX(-50%);z-index:9;padding:12px 26px;border-radius:99px;background:var(--gold);color:#2b0b00;font-weight:600;font-size:18px;box-shadow:0 0 30px rgba(255,210,63,.6);animation:blink 1s steps(2) infinite}
-#toast[hidden]{display:none}
-.answer .artist{font-size:min(3.6vw,7vh);color:var(--cyan);margin-top:8px;font-weight:600;text-shadow:0 0 14px rgba(51,230,255,.6)}
-.qr{position:fixed;right:40px;bottom:36px;background:#fff;padding:10px;border-radius:14px;text-align:center;font-size:12px;color:#444;z-index:2;transition:opacity .3s;box-shadow:0 0 0 4px var(--pink),0 0 30px rgba(255,63,164,.6)}
-.qr.lg{padding:14px;font-size:15px;font-weight:600}
-.qr.lg canvas,.qr.lg img{width:190px!important;height:190px!important}
-.qr img,.qr canvas{display:block;margin:0 auto 6px}
-.qr .code{display:block;font-family:Kanit,sans-serif;font-weight:800;font-size:22px;letter-spacing:.15em;color:#2b0b63}
-.qr.hide{opacity:0;pointer-events:none}
-.status{position:fixed;left:48px;bottom:36px;font-size:13px;color:var(--mute);z-index:2}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#6b5a99;margin-right:6px}
-.dot.ok{background:var(--green);box-shadow:0 0 8px var(--green)}
-.cf{position:fixed;top:-20px;width:12px;height:18px;z-index:8;pointer-events:none;animation:fall linear forwards}
-@keyframes fall{to{transform:translate(var(--dx),110vh) rotate(var(--r))}}
+body{min-height:100vh;background:radial-gradient(ellipse at 50% 110%,#5b1aa8 0%,var(--bg2) 35%,var(--bg) 75%) fixed;color:var(--ink);font-family:Prompt,sans-serif;padding:56px 16px 48px}
+.wrap{max-width:960px;margin:0 auto}
+header{text-align:center;margin-bottom:40px}
+.num{font-family:Kanit,sans-serif;font-weight:600;letter-spacing:.35em;color:var(--cyan);text-shadow:0 0 12px rgba(51,230,255,.7);font-size:clamp(13px,2vw,18px)}
+h1{font-family:Kanit,sans-serif;font-weight:900;font-size:clamp(44px,9vw,96px);line-height:1.05;margin-top:8px;
+ background:linear-gradient(180deg,#fff7c2 0%,var(--gold) 45%,#ff8a1f 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+ filter:drop-shadow(0 5px 0 #8a1d5a) drop-shadow(0 0 26px rgba(255,63,164,.5))}
+.sub{color:var(--mute);margin-top:14px;font-size:clamp(15px,2vw,19px)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,320px));justify-content:center;gap:18px}
+.card{display:flex;flex-direction:column;gap:10px;padding:24px;border-radius:22px;background:var(--panel);border:2px solid var(--line);color:inherit;text-decoration:none;transition:transform .15s,border-color .15s,box-shadow .15s}
+a.card:hover,a.card:focus-visible{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 0 30px rgba(255,210,63,.35);outline:none}
+.icon{font-size:40px;line-height:1;color:var(--gold)}
+.card h2{font-family:Kanit,sans-serif;font-weight:800;font-size:24px}
+.card p{color:var(--mute);font-size:15px;line-height:1.5;flex:1}
+.go{font-weight:600;color:var(--cyan)}
+.links{display:flex;gap:14px;flex-wrap:wrap}
+.links a{color:var(--cyan);font-weight:600;text-decoration:none}
+.links a:hover{text-decoration:underline}
+.card.soon{opacity:.45;border-style:dashed}
 </style>
 </head>
 <body>
-<div class="frame"></div>
-<header>
-  <div class="logo">ทายเพลง<span>!</span></div>
-  <button class="fs" id="fs" title="เต็มจอ (F)">⛶ เต็มจอ</button>
-</header>
-<main id="main"></main>
-<div class="vid"><div id="ytp"></div></div>
-<button id="tapPlay" hidden>▶ แตะเพื่อเล่นเพลง</button>
-<div class="qr" id="qr"><div id="qrc"></div><span id="qrtxt">สแกนเพื่อควบคุม</span></div>
-<div class="status"><span class="dot" id="dot"></span><span id="stat">กำลังเชื่อมต่อ…</span></div>
-<div id="toast" hidden>🔈 คลิกที่จอนี้ 1 ครั้งเพื่อเปิดเสียง</div>
-
+<div class="wrap">
+  <header>
+    <p class="num">WEDDING</p>
+    <h1>ME Wedding</h1>
+    <p class="sub">เลือกสิ่งที่ต้องการใช้ในงาน</p>
+  </header>
+  <main class="grid" id="grid"></main>
+</div>
 <script>
-const S = window.SONGS, N = S.length;
-const st = { i: -1, phase: "intro", showText: true, music: true, rate: 0.9 };
-let qrOn = true, speaking = false, line = -1, heard = false, conns = [];
-const $ = id => document.getElementById(id);
+// เพิ่ม feature ใหม่ที่นี่: { icon, title, desc, href, links? } — ไม่มี href = "เร็วๆ นี้"
+const FEATURES = [
+  { icon: "♪", title: "เกมทายเพลง", desc: "บอทอ่านเนื้อเพลง แขกทายชื่อเพลง แล้วเฉลยพร้อมเปิดเพลงจาก YouTube",
+    href: "game/", links: [["จอเกม", "game/"], ["รีโมต", "game/remote.html"]] },
+];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const ytOf = s => {
-  const u = s?.yt || "", id = (u.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/) || u.match(/^([\w-]{11})$/) || [])[1];
-  if (!id) return null;
-  const t = u.match(/[?&](?:t|start)=(?:(\d+)m)?(\d+)s?/);
-  return { id, start: t ? (+t[1] || 0) * 60 + +t[2] : 0 };
-};
-const linesOf = s => (s.lyrics || "").split("\n").map(x => x.trim()).filter(Boolean);
-
-try { const sv = JSON.parse(localStorage.getItem("mew-state")); if (sv) Object.assign(st, sv, { i: Math.min(sv.i ?? -1, N) }); delete st.scores; } catch {}
-const save = () => { try { localStorage.setItem("mew-state", JSON.stringify(st)); } catch {} };
-
-// ---------- speech ----------
-let voices = [];
-const loadVoices = () => voices = speechSynthesis.getVoices();
-loadVoices(); speechSynthesis.onvoiceschanged = loadVoices;
-function stopRead() { speechSynthesis.cancel(); speaking = false; line = -1; }
-function read() {
-  if (needUnlock()) return;
-  const s = S[st.i]; if (!s) return;
-  const ls = linesOf(s); if (!ls.length) return;
-  stopRead(); st.phase = "intro"; speaking = true; heard = true;
-  const v = voices.find(v => v.lang.replace("_", "-") === s.lang) || voices.find(v => v.lang.startsWith(s.lang.slice(0, 2)));
-  const tok = {}; read.tok = tok;
-  const say = k => {
-    if (read.tok !== tok) return;
-    if (k >= ls.length) { speaking = false; line = -1; render(); return; }
-    line = k; render();
-    const u = new SpeechSynthesisUtterance(ls[k]);
-    u.lang = s.lang; if (v) u.voice = v; u.rate = st.rate; u.pitch = 1;
-    u.onend = () => setTimeout(() => say(k + 1), 350);
-    u.onerror = () => { if (read.tok === tok) { speaking = false; line = -1; render(); } };
-    speechSynthesis.speak(u);
-  };
-  say(0);
-}
-
-// ---------- navigation ----------
-function go(i) { stopRead(); heard = false; st.music = true; st.i = Math.max(-1, Math.min(N, i)); st.phase = "intro"; render(); }
-const canReveal = () => heard || !linesOf(S[st.i]).length;
-function next() {
-  if (st.i >= 0 && st.i < N && st.phase === "intro") { if (!canReveal()) return; stopRead(); st.phase = "answer"; render(); }
-  else go(st.i + 1);
-}
-function prev() {
-  if (st.i >= 0 && st.i < N && st.phase === "answer") { st.phase = "intro"; render(); }
-  else go(st.i - 1);
-}
-function reveal() { if (st.i >= 0 && st.i < N && (st.phase === "answer" || canReveal())) { stopRead(); st.phase = st.phase === "answer" ? "intro" : "answer"; st.music = true; render(); } }
-
-
-// ---------- fx ----------
-let ac, lastKey = "";
-function tone(fs, dur = .12, type = "square", vol = .08) {
-  try {
-    ac = ac || new AudioContext(); let t = ac.currentTime;
-    fs.forEach(f => { const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f;
-      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur); o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur); t += dur * .8; });
-  } catch {}
-}
-function confetti(n = 120) {
-  const cs = ["#ffd23f", "#ff3fa4", "#33e6ff", "#3dffa0", "#fff"];
-  for (let k = 0; k < n; k++) {
-    const e = document.createElement("i"); e.className = "cf";
-    e.style.cssText = `left:${Math.random() * 100}vw;background:${cs[k % cs.length]};--dx:${(Math.random() - .5) * 300}px;--r:${Math.random() * 1080}deg;animation-duration:${2 + Math.random() * 2.5}s;animation-delay:${Math.random() * .6}s;border-radius:${k % 3 ? 2 : 50}%`;
-    document.body.appendChild(e); setTimeout(() => e.remove(), 5500);
-  }
-}
-function fx() {
-  const key = st.i + st.phase; if (key === lastKey) return; lastKey = key;
-  if (st.i >= N) { confetti(260); tone([523, 659, 784, 1047, 1319], .18, "triangle", .12); }
-  else if (st.i >= 0 && st.phase === "answer") { confetti(); tone([784, 1047, 1319], .14, "triangle", .12); }
-  else if (st.i >= 0) tone([330, 440], .08);
-}
-
-// ---------- render ----------
-function render() {
-  save();
-  $("qr").classList.toggle("lg", st.i === -1);
-  $("qr").classList.toggle("hide", !qrOn);
-  const m = $("main");
-  let h;
-  if (st.i === -1) {
-    h = `<div class="slide"><p class="num">WEDDING GAME SHOW</p><h1 class="script">ทายเพลง<br>จากเนื้อร้อง</h1><div class="divider"></div></div>`;
-  } else if (st.i >= N) {
-    h = `<div class="slide"><p class="num">GAME OVER</p><h1 class="script">จบเกมแล้ว!</h1><div class="divider"></div><p class="sub">ขอบคุณทุกคนที่ร่วมสนุก 💕</p></div>`;
-  } else {
-    const s = S[st.i], ls = linesOf(s);
-    if (st.phase === "answer") {
-      const y = ytOf(s), v = y && st.music;
-      h = `<div class="slide answer split"><div class="left"><p class="num">เฉลย</p><div class="divider"></div>
-        <div class="card"><h2>${esc(s.title)}</h2><p class="artist">${esc(s.artist)}</p></div>
-        ${v ? `<div class="playing"><div class="bars on">${"<i></i>".repeat(7)}</div>กำลังเล่นเพลง</div>` : ""}</div>
-        ${ls.length ? `<div class="right lyrics plain">${ls.map(x => `<p>${esc(x)}</p>`).join("")}</div>` : ""}</div>`;
-    } else if (speaking || line >= 0 || (heard && ls.length)) {
-      const done = !speaking, hot = done ? `<p class="hint hot">🔔 ใครรู้แล้ว ยกมือเลย!</p>` : "";
-      h = st.showText
-        ? `<div class="slide"><div class="lyrics ${done ? "plain" : ""}">${ls.map((x, k) => `<p class="${done ? "" : k < line ? "done" : k === line ? "on" : ""}">${esc(x)}</p>`).join("")}</div>${hot}</div>`
-        : `<div class="slide"><div class="bars ${done ? "" : "on"}">${"<i></i>".repeat(14)}</div>${done ? hot : `<p class="hint">บอทกำลังอ่าน…</p>`}</div>`;
-    } else {
-      h = `<div class="slide"><p class="num">เพลงต่อไป</p><p class="big">♪</p>
-        ${!ls.length ? `<p class="hint">⚠ ยังไม่ได้ใส่เนื้อเพลงใน songs.js</p>`
-          : heard && st.showText ? `<div class="lyrics plain" style="margin-top:30px;font-size:clamp(20px,2.4vw,40px)">${ls.map(x => `<p>${esc(x)}</p>`).join("")}</div>`
-          : `<p class="hint ${heard ? "hot" : ""}">${heard ? "🔔 ใครรู้แล้ว ยกมือเลย!" : "พร้อมฟังแล้วยัง?"}</p>`}</div>`;
-    }
-  }
-  if (m.dataset.h !== h) { m.dataset.h = h; m.innerHTML = h; updPlay(); }
-  syncMusic();
-  fx();
-  broadcast();
-}
-
-// ---------- peer ----------
-function snapshot() {
-  const s = S[st.i];
-  return { type: "state", st, qr: qrOn, n: N, speaking, line, canReveal: st.i >= 0 && st.i < N && canReveal(),
-    song: s ? { yt: !!ytOf(s), title: s.title, artist: s.artist, lines: linesOf(s).length } : null,
-    list: S.map(s => ({ title: s.title })) };
-}
-function broadcast() { const d = snapshot(); conns.forEach(c => c.open && c.send(d)); }
-function handle(m) {
-  switch (m.cmd) {
-    case "next": next(); break;
-    case "prev": prev(); break;
-    case "read": read(); break;
-    case "stop": stopRead(); render(); break;
-    case "text": st.showText = !st.showText; render(); break;
-    case "reveal": reveal(); break;
-    case "music": st.music = !st.music; render(); break;
-    case "play": ytReady && (player.unMute(), player.playVideo()); break;
-    case "goto": go(m.i); break;
-    case "rate": st.rate = Math.min(1.5, Math.max(0.5, +m.v || 0.9)); render(); break;
-    case "reset": go(-1); break;
-    case "qr": qrOn = !qrOn; render(); break;
-    case "hello": broadcast(); break;
-  }
-}
-function updStat() {
-  const n = conns.filter(c => c.open).length;
-  $("dot").classList.toggle("ok", n > 0);
-  $("stat").textContent = n ? `รีโมตเชื่อมต่อแล้ว (${n})` : "รอรีโมต…";
-}
-function startPeer(fresh) {
-  let id = !fresh && localStorage.getItem("mew-peer");
-  if (!id) { id = "mewed-" + Math.random().toString(36).slice(2, 8); localStorage.setItem("mew-peer", id); }
-  const p = new Peer(id);
-  p.on("open", () => {
-    const url = new URL("remote.html", location.href); url.searchParams.set("id", id);
-    $("qrc").innerHTML = ""; new QRCode($("qrc"), { text: url.href, width: 150, height: 150 });
-    $("qrtxt").innerHTML = `สแกน หรือใส่รหัส<br><b class="code">${id.slice(6)}</b>`;
-    updStat();
-  });
-  p.on("connection", c => {
-    c.on("open", () => { conns.push(c); qrOn = false; updStat(); render(); });
-    c.on("data", handle);
-    c.on("close", () => { conns = conns.filter(x => x !== c); updStat(); });
-  });
-  p.on("disconnected", () => setTimeout(() => !p.destroyed && p.reconnect(), 1500));
-  p.on("error", e => {
-    if (e.type === "unavailable-id") { p.destroy(); startPeer(true); }
-    else { $("stat").textContent = "เชื่อมต่อไม่ได้: " + e.type; }
-  });
-}
-
-// ---------- keyboard ----------
-function toggleFs() {
-  const d = document;
-  if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
-  else {
-    const el = d.documentElement, r = (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
-    r?.catch?.(() => { $("fs").textContent = "กด F11 (Mac: ⌃⌘F)"; setTimeout(updFs, 3000); });
-  }
-}
-const updFs = () => { $("fs").textContent = (document.fullscreenElement || document.webkitFullscreenElement) ? "✕ ออกจากเต็มจอ" : "⛶ เต็มจอ"; };
-$("fs").onclick = toggleFs;
-document.addEventListener("fullscreenchange", updFs); document.addEventListener("webkitfullscreenchange", updFs);
-
-addEventListener("keydown", e => {
-  const k = e.key;
-  if (k === "f" || k === "F") toggleFs();
-  else if (k === "ArrowRight" || k === "PageDown") next();
-  else if (k === "ArrowLeft" || k === "PageUp") prev();
-  else if (k === " ") { e.preventDefault(); speaking ? (stopRead(), render()) : read(); }
-  else if (k === "Enter") reveal();
-  else if (k === "t" || k === "T") { st.showText = !st.showText; render(); }
-  else if (k === "q" || k === "Q") { qrOn = !qrOn; render(); }
-});
-// เปิดเสียงเมื่อมีการคลิก/กดปุ่มบนจอนี้ครั้งแรก (เบราว์เซอร์บังคับ)
-const unlocked = () => !navigator.userActivation || navigator.userActivation.hasBeenActive;
-const unlock = () => { try { speechSynthesis.speak(new SpeechSynthesisUtterance("")); } catch {} prime(); $("toast").hidden = true; removeEventListener("pointerdown", unlock); removeEventListener("keydown", unlock); };
-addEventListener("pointerdown", unlock); addEventListener("keydown", unlock);
-// ---------- YouTube: player ตัวเดียวสร้างครั้งเดียว แล้วสลับเพลงด้วย loadVideoById ----------
-// สร้างและ "ปลุก" player ตอนคลิกจอครั้งแรก → เบราว์เซอร์จะยอมให้เล่นเสียงต่อ แม้อยู่โหมดเต็มจอ
-let player, ytReady = false, ytState = -1, ytWant = null, ytTimer, primed = false;
-window.onYouTubeIframeAPIReady = () => {
-  player = new YT.Player("ytp", { width: 240, height: 240,
-    playerVars: { playsinline: 1, rel: 0, controls: 0, disablekb: 1 },
-    events: { onReady: () => { ytReady = true; if (primed) prime(); syncMusic(); },
-              onStateChange: e => { ytState = e.data; updPlay(); } } });
-};
-function prime() {
-  primed = true;
-  if (!ytReady || ytWant) return;
-  const y = S.map(ytOf).find(Boolean); if (!y) return;
-  player.mute(); player.loadVideoById({ videoId: y.id, startSeconds: y.start });
-  setTimeout(() => { if (!ytWant) { player.pauseVideo(); player.unMute(); } }, 600);
-}
-function syncMusic() {
-  const s = S[st.i], y = st.i >= 0 && st.i < N && st.phase === "answer" && st.music ? ytOf(s) : null;
-  const key = y ? y.id + "@" + y.start : null;
-  if (!ytReady || key === ytWant) return;
-  ytWant = key; clearInterval(ytTimer); $("tapPlay").hidden = true;
-  if (!y) { player.stopVideo(); return; }
-  player.unMute(); player.setVolume(100);
-  player.loadVideoById({ videoId: y.id, startSeconds: y.start });
-  let n = 0;
-  ytTimer = setInterval(() => {
-    if (ytState === 1) return clearInterval(ytTimer);
-    player.unMute(); player.playVideo();
-    if (++n === 5) $("tapPlay").hidden = false;  // ~3.5 วิแล้วยังไม่เล่น → ให้แตะจอ
-    if (n > 20) clearInterval(ytTimer);
-  }, 700);
-}
-$("tapPlay").onclick = () => { if (ytReady) { player.unMute(); player.playVideo(); } };
-function updPlay() { if (ytState === 1) $("tapPlay").hidden = true; const el = document.querySelector(".playing"); if (el) el.classList.toggle("wait", ytState !== 1); }
-function needUnlock() { if (unlocked()) return false; $("toast").hidden = false; return true; }
-if (!unlocked()) $("toast").hidden = false;
-
-lastKey = st.i + st.phase; startPeer(); render();
+document.getElementById("grid").innerHTML = FEATURES.map(f => f.links
+  ? `<div class="card"><div class="icon">${esc(f.icon)}</div><h2>${esc(f.title)}</h2><p>${esc(f.desc)}</p>
+      <div class="links">${f.links.map(([t, h]) => `<a href="${esc(h)}">${esc(t)} →</a>`).join("")}</div></div>`
+  : f.href
+  ? `<a class="card" href="${esc(f.href)}"><div class="icon">${esc(f.icon)}</div><h2>${esc(f.title)}</h2><p>${esc(f.desc)}</p><span class="go">เปิด →</span></a>`
+  : `<div class="card soon"><div class="icon">${esc(f.icon)}</div><h2>${esc(f.title)}</h2><p>${esc(f.desc)}</p><span class="go">เร็วๆ นี้</span></div>`
+).join("");
 </script>
 </body>
 </html>

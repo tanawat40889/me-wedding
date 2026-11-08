@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# แปลงไฟล์ข้อความ -> songs.js   ใช้: python3 import_txt.py love-songs.txt
+# แปลงไฟล์ข้อความ -> songs.js   ใช้: cd game && python3 import_txt.py love-songs.txt
 # รูปแบบ: บรรทัดชื่อเพลง / "Youtube: ลิงก์" / "เนื้อเพลง: ..." ต่อด้วยบรรทัดเนื้อเพลง / เว้นบรรทัดว่างคั่นเพลง
 # ศิลปิน/ภาษา/Mark ดึงจาก songs-meta.json (จับคู่ด้วยชื่อเพลง)
 import json, re, sys, pathlib
