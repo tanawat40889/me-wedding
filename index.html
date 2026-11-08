@@ -3,56 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#12072b">
-<title>ME Wedding</title>
+<meta name="theme-color" content="#faf8f5">
+<title>งานแต่ง อั๋น กอล์ฟ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;800;900&family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Noto+Serif+Thai:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#12072b;--bg2:#2b0b63;--ink:#fff;--mute:#b7a6ea;--gold:#ffd23f;--pink:#ff3fa4;--cyan:#33e6ff;--panel:rgba(255,255,255,.07);--line:rgba(183,166,234,.25)}
+:root{--bg:#faf8f5;--card:#fff;--ink:#1f1d1a;--mute:#6f6a63;--line:#e8e3dc;--accent:#8a6a45;--shadow:0 1px 2px rgba(31,29,26,.05),0 4px 16px rgba(31,29,26,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#161513;--card:#1f1e1b;--ink:#f1eee9;--mute:#a39d94;--line:#2f2d29;--accent:#c9a67c;--shadow:0 1px 2px rgba(0,0,0,.3)}}
 *{box-sizing:border-box;margin:0}
-body{min-height:100vh;background:radial-gradient(ellipse at 50% 110%,#5b1aa8 0%,var(--bg2) 35%,var(--bg) 75%) fixed;color:var(--ink);font-family:Prompt,sans-serif;padding:56px 16px 48px}
-.wrap{max-width:960px;margin:0 auto}
-header{text-align:center;margin-bottom:40px}
-.num{font-family:Kanit,sans-serif;font-weight:600;letter-spacing:.35em;color:var(--cyan);text-shadow:0 0 12px rgba(51,230,255,.7);font-size:clamp(13px,2vw,18px)}
-h1{font-family:Kanit,sans-serif;font-weight:900;font-size:clamp(44px,9vw,96px);line-height:1.05;margin-top:8px;
- background:linear-gradient(180deg,#fff7c2 0%,var(--gold) 45%,#ff8a1f 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
- filter:drop-shadow(0 5px 0 #8a1d5a) drop-shadow(0 0 26px rgba(255,63,164,.5))}
-.sub{color:var(--mute);margin-top:14px;font-size:clamp(15px,2vw,19px)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,320px));justify-content:center;gap:18px}
-.card{display:flex;flex-direction:column;gap:10px;padding:24px;border-radius:22px;background:var(--panel);border:2px solid var(--line);color:inherit;text-decoration:none;transition:transform .15s,border-color .15s,box-shadow .15s}
-a.card:hover,a.card:focus-visible{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 0 30px rgba(255,210,63,.35);outline:none}
-.icon{font-size:40px;line-height:1;color:var(--gold)}
-.card h2{font-family:Kanit,sans-serif;font-weight:800;font-size:24px}
-.card p{color:var(--mute);font-size:15px;line-height:1.5;flex:1}
-.go{font-weight:600;color:var(--cyan)}
-.links{display:flex;gap:14px;flex-wrap:wrap}
-.links a{color:var(--cyan);font-weight:600;text-decoration:none}
-.links a:hover{text-decoration:underline}
-.card.soon{opacity:.45;border-style:dashed}
+body{min-height:100vh;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai",system-ui,sans-serif;line-height:1.6;padding:72px 16px 56px}
+.wrap{max-width:880px;margin:0 auto}
+header{text-align:center;margin-bottom:48px}
+.eyebrow{font-size:13px;font-weight:500;letter-spacing:.2em;color:var(--accent);text-transform:uppercase}
+h1{font-family:"Noto Serif Thai",serif;font-weight:600;font-size:clamp(34px,7vw,56px);line-height:1.2;margin-top:10px;letter-spacing:-.01em}
+.sub{color:var(--mute);margin-top:10px;font-size:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.card{display:flex;flex-direction:column;gap:6px;padding:22px;border-radius:14px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);color:inherit;text-decoration:none;transition:border-color .15s,transform .15s}
+a.card:hover,a.card:focus-visible{border-color:var(--accent);transform:translateY(-2px);outline:none}
+.card h2{font-size:18px;font-weight:600}
+.card p{color:var(--mute);font-size:14px;flex:1}
+.go{margin-top:8px;font-size:14px;font-weight:500;color:var(--accent)}
+.card.soon{box-shadow:none;border-style:dashed;opacity:.6}
+footer{text-align:center;color:var(--mute);font-size:13px;margin-top:48px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <p class="num">WEDDING</p>
-    <h1>ME Wedding</h1>
-    <p class="sub">เลือกสิ่งที่ต้องการใช้ในงาน</p>
+    <p class="eyebrow">Wedding</p>
+    <h1>งานแต่ง อั๋น กอล์ฟ</h1>
+    <p class="sub">เลือกเมนูที่ต้องการ</p>
   </header>
   <main class="grid" id="grid"></main>
 </div>
 <script>
-// เพิ่ม feature ใหม่ที่นี่: { icon, title, desc, href, links? } — ไม่มี href = "เร็วๆ นี้"
+// เพิ่มเมนูใหม่ที่นี่: { title, desc, href } — ไม่ใส่ href = แสดงเป็น "เร็วๆ นี้"
 const FEATURES = [
-  { icon: "♪", title: "เกมทายเพลง", desc: "บอทอ่านเนื้อเพลง แขกทายชื่อเพลง แล้วเฉลยพร้อมเปิดเพลงจาก YouTube",
-    href: "game/", links: [["จอเกม", "game/"], ["รีโมต", "game/remote.html"]] },
+  { title: "เกมทายเพลง", desc: "เกมทายชื่อเพลงจากเนื้อร้อง สำหรับเล่นบนเวที", href: "game/" },
 ];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-document.getElementById("grid").innerHTML = FEATURES.map(f => f.links
-  ? `<div class="card"><div class="icon">${esc(f.icon)}</div><h2>${esc(f.title)}</h2><p>${esc(f.desc)}</p>
-      <div class="links">${f.links.map(([t, h]) => `<a href="${esc(h)}">${esc(t)} →</a>`).join("")}</div></div>`
-  : f.href
-  ? `<a class="card" href="${esc(f.href)}"><div class="icon">${esc(f.icon)}</div><h2>${esc(f.title)}</h2><p>${esc(f.desc)}</p><span class="go">เปิด →</span></a>`
-  : `<div class="card soon"><div class="icon">${esc(f.icon)}</div><h2>${esc(f.title)}</h2><p>${esc(f.desc)}</p><span class="go">เร็วๆ นี้</span></div>`
+document.getElementById("grid").innerHTML = FEATURES.map(f => f.href
+  ? `<a class="card" href="${esc(f.href)}"><h2>${esc(f.title)}</h2><p>${esc(f.desc)}</p><span class="go">เปิด →</span></a>`
+  : `<div class="card soon"><h2>${esc(f.title)}</h2><p>${esc(f.desc)}</p><span class="go">เร็วๆ นี้</span></div>`
 ).join("");
 </script>
 </body>
