@@ -27,13 +27,16 @@ h1{font-family:Kanit,sans-serif;font-weight:800;color:#a8426a;font-size:clamp(20
 .side h2{font-family:Kanit,sans-serif;font-weight:600;font-size:15px;color:var(--sc);text-align:center;margin-bottom:8px}
 .side h2 small{display:block;font-family:Prompt,sans-serif;font-weight:400;font-size:12px;color:var(--mute)}
 .rows{display:flex;flex-direction:column;gap:6px}
-.row{display:grid;gap:5px}
-.seat{container-type:inline-size;min-width:0;aspect-ratio:1/1.05;border-radius:10px;background:var(--sbg);border:1.5px solid var(--sline);padding:4px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;font:inherit;color:inherit}
+.row{display:grid;gap:5px;grid-auto-rows:clamp(46px,8.5vw,74px)}
+.seat{grid-row:1;container-type:inline-size;min-width:0;border-radius:10px;background:var(--sbg);border:1.5px solid var(--sline);padding:4px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;font:inherit;color:inherit}
 .seat b{font-family:Kanit,sans-serif;font-weight:600;font-size:clamp(13px,2.4vw,17px);color:var(--sc);line-height:1.1}
 .seat span{font-size:clamp(9px,1.5vw,12px);line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word;margin-top:2px}
 @container (max-width:54px){.seat span{display:none}}
 .seat.in{background:var(--okbg);border-color:#8fd0ae}
 .seat.in b{color:var(--ok)}
+.seat small{font-size:11px;color:var(--mute)}
+.seat.multi{background-image:repeating-linear-gradient(90deg,transparent 0 calc(var(--w) - 1px),var(--sline) calc(var(--w) - 1px) var(--w))}
+.seat.in.multi{background-image:repeating-linear-gradient(90deg,transparent 0 calc(var(--w) - 1px),#bfe5d1 calc(var(--w) - 1px) var(--w))}
 .seat.empty{background:transparent;border-style:dashed;cursor:default}
 .over{margin-top:18px;padding:12px 14px;border-radius:14px;background:#fff8e6;border:1px solid #f1d58a;font-size:14px}
 .status{font-size:12px;color:var(--mute);text-align:center;margin-top:16px}
@@ -68,9 +71,11 @@ dialog button.pri{background:var(--accent);border-color:var(--accent);color:#fff
 </div>
 
 <dialog id="info"><h2 id="iName"></h2><p id="iMeta"></p><div id="iTag"></div><div id="iOk"></div>
+  <div class="cfg" style="margin-top:14px"><div class="step"><span>จำนวนคน (ใช้เก้าอี้)</span>
+    <div><button id="sMinus" aria-label="ลด">−</button><output id="sN"></output><button id="sPlus" aria-label="เพิ่ม">+</button></div></div></div>
   <div class="acts"><button id="iClose">ปิด</button></div></dialog>
 
-<dialog id="cfg"><h2>ตั้งค่าเก้าอี้</h2><p>จำนวนแถว (นับจากหน้าเวที) และเก้าอี้ต่อแถว ของแต่ละฝั่ง</p>
+<dialog id="cfg"><h2>ตั้งค่าเก้าอี้</h2><p>จำนวนแถว (นับจากหน้าเวที) และเก้าอี้ต่อแถว ของแต่ละฝั่ง — คนที่มาด้วยกันจะนั่งติดกันในแถวเดียว</p>
   <div class="cfg" id="cfgBody"></div>
   <div class="acts"><button id="cfgCancel">ยกเลิก</button><button class="pri" id="cfgSave">บันทึก</button></div></dialog>
 
@@ -103,52 +108,89 @@ async function load() {
 }
 
 // จัดที่นั่งอัตโนมัติตามลำดับในชีต: แถวหน้าสุด (ติดเวที) ก่อน, ในแถวเริ่มจากเก้าอี้ติดทางเดินกลาง
-function seatMap(side) {
+// รายการที่มาหลายคนนั่งติดกันในแถวเดียว ถ้าแถวนั้นเหลือที่ไม่พอจะขึ้นแถวใหม่
+function place(side) {
   const { rows, cols } = layout[side], list = guests.filter(g => g.side === side).sort((a, b) => a.seq - b.seq);
-  const grid = Array.from({ length: rows }, (_, r) => Array.from({ length: cols }, (_, c) => list[r * cols + c] || null));
-  if (side === "เจ้าสาว") grid.forEach(row => row.reverse());  // ฝั่งซ้าย: ทางเดินอยู่ทางขวา
-  return { grid, over: list.slice(rows * cols) };
+  const used = Array(rows).fill(0), parts = [], over = [];
+  let r = 0;
+  for (const g of list) {
+    let k = g.seats || 1;
+    if (r < rows && k <= cols && cols - used[r] < k) r++;
+    const mine = [];
+    while (k > 0 && r < rows) {
+      if (used[r] === cols) { r++; continue; }
+      const n = Math.min(k, cols - used[r]);
+      mine.push({ g, r, off: used[r], n }); used[r] += n; k -= n;
+    }
+    if (k > 0) over.push(g);
+    parts.push(...mine);
+  }
+  return { rows, cols, parts, used, over, need: list.reduce((a, g) => a + (g.seats || 1), 0) };
 }
+// คอลัมน์บนจอ: ฝั่งซ้าย (เจ้าสาว) ทางเดินอยู่ทางขวา จึงนับจากขวา
+const colStart = (side, cols, off, n) => side === "เจ้าสาว" ? cols - off - n + 1 : off + 1;
 
 function render() {
   if (!layout) return;
   const overs = [];
   const block = side => {
-    const { grid, over } = seatMap(side), n = guests.filter(g => g.side === side);
+    const { rows, cols, parts, used, over, need } = place(side), n = guests.filter(g => g.side === side);
     overs.push(...over);
+    const rowsHTML = Array.from({ length: rows }, (_, r) => {
+      const mine = parts.filter(p => p.r === r);
+      const empties = Array.from({ length: cols - used[r] }, (_, e) => colStart(side, cols, used[r] + e, 1));
+      return `<div class="row" style="grid-template-columns:repeat(${cols},1fr)">${mine.map(p => `
+        <button class="seat ${p.g.arrived_at ? "in" : ""} ${p.n > 1 ? "multi" : ""}" data-id="${p.g.id}"
+          style="grid-column:${colStart(side, cols, p.off, p.n)} / span ${p.n};--w:calc(100% / ${p.n})">
+          <b>${p.g.seq}</b><span>${esc(label(p.g.name))}</span>${p.n > 1 ? `<small>${p.n} ที่</small>` : ""}</button>`).join("")}
+        ${empties.map(c => `<div class="seat empty" style="grid-column:${c}"></div>`).join("")}</div>`;
+    }).join("");
     return `<div class="side" data-s="${esc(side)}">
-      <h2>ฝั่ง${esc(side)}<small>มาแล้ว ${n.filter(g => g.arrived_at).length} / ${n.length} · ${layout[side].rows} แถว × ${layout[side].cols} ที่</small></h2>
-      <div class="rows">${grid.map(row => `<div class="row" style="grid-template-columns:repeat(${row.length},1fr)">${row.map(g => g
-        ? `<button class="seat ${g.arrived_at ? "in" : ""}" data-id="${g.id}"><b>${g.seq}</b><span>${esc(label(g.name))}</span></button>`
-        : `<div class="seat empty"></div>`).join("")}</div>`).join("")}</div></div>`;
+      <h2>ฝั่ง${esc(side)}<small>มาแล้ว ${n.filter(g => g.arrived_at).length} / ${n.length} รายการ · ${need} คน · ${rows}×${cols} = ${rows * cols} ที่</small></h2>
+      <div class="rows">${rowsHTML}</div></div>`;
   };
   $("hall").innerHTML = block(SIDES[0]) + `<div class="aisle"></div>` + block(SIDES[1]);
-  $("over").innerHTML = overs.length ? `<div class="over">⚠ เก้าอี้ไม่พอ ${overs.length} รายการ: ${overs.map(g => `ฝั่ง${esc(g.side)} ${g.seq} ${esc(short(g.name))}`).join(", ")} — กด "ตั้งค่าเก้าอี้" เพื่อเพิ่ม</div>` : "";
+  $("over").innerHTML = overs.length ? `<div class="over">⚠ เก้าอี้ไม่พอ ${overs.length} รายการ: ${overs.map(g => `ฝั่ง${esc(g.side)} ${g.seq} ${esc(short(g.name))} (${g.seats} คน)`).join(", ")} — กด "ตั้งค่าเก้าอี้" เพื่อเพิ่ม</div>` : "";
   $("status").textContent = lastOk ? `อัปเดตล่าสุด ${new Date(lastOk).toLocaleTimeString("th-TH")} · รีเฟรชอัตโนมัติ` : "";
+  if ($("info").open) fillInfo();
 }
 
-$("hall").onclick = e => {
-  const b = e.target.closest("[data-id]"); if (!b) return;
-  const g = guests.find(x => x.id === +b.dataset.id); if (!g) return;
-  const { grid } = seatMap(g.side);
-  const r = grid.findIndex(row => row.includes(g)), c = g.side === "เจ้าสาว" ? grid[r].length - grid[r].indexOf(g) : grid[r].indexOf(g) + 1;
+let infoId = null;
+function fillInfo() {
+  const g = guests.find(x => x.id === infoId); if (!g) return;
+  const ps = place(g.side).parts.filter(p => p.g === g);
+  const where = ps.map(p => `แถว ${p.r + 1} ที่ ${p.off + 1}${p.n > 1 ? "–" + (p.off + p.n) : ""}`).join(", ") || "ยังไม่มีที่นั่ง (เก้าอี้ไม่พอ)";
   $("info").dataset.s = g.side;
   $("iName").textContent = g.name;
   $("iMeta").textContent = [g.relation, `${g.gift} ${g.gift_qty} ชิ้น`, g.note].filter(Boolean).join(" · ");
-  $("iTag").innerHTML = `<span class="tag">ฝั่ง${esc(g.side)} · แถว ${r + 1} · ที่ ${c} (นับจากทางเดินกลาง)</span>`;
+  $("iTag").innerHTML = `<span class="tag">ฝั่ง${esc(g.side)} · ${where} (นับจากทางเดินกลาง)</span>`;
   $("iOk").innerHTML = g.arrived_at ? `<p class="ok">มาแล้ว ${new Date(g.arrived_at).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</p>` : `<p>ยังไม่ได้เช็คชื่อ</p>`;
-  $("info").showModal();
+  $("sN").textContent = g.seats;
+}
+$("hall").onclick = e => {
+  const b = e.target.closest("[data-id]"); if (!b) return;
+  infoId = +b.dataset.id; fillInfo(); $("info").showModal();
 };
+async function setSeats(d) {
+  const g = guests.find(x => x.id === infoId); if (!g) return;
+  const v = Math.min(20, Math.max(1, g.seats + d)); if (v === g.seats) return;
+  const prev = g.seats; g.seats = v; render();
+  try { Object.assign(g, await rpc("guest_seats", { p_id: g.id, p_n: v })); }
+  catch { g.seats = prev; alert("บันทึกไม่สำเร็จ ลองอีกครั้ง"); }
+  render();
+}
+$("sMinus").onclick = () => setSeats(-1);
+$("sPlus").onclick = () => setSeats(1);
 $("iClose").onclick = () => $("info").close();
 
 let draft;
 function drawCfg() {
   $("cfgBody").innerHTML = SIDES.map(s => {
-    const n = guests.filter(g => g.side === s).length, cap = draft[s].rows * draft[s].cols;
+    const n = guests.filter(g => g.side === s).reduce((a, g) => a + (g.seats || 1), 0), cap = draft[s].rows * draft[s].cols;
     return `<fieldset data-s="${esc(s)}"><legend>ฝั่ง${esc(s)}</legend>
       ${["rows", "cols"].map(k => `<div class="step"><span>${k === "rows" ? "จำนวนแถว" : "เก้าอี้ต่อแถว"}</span>
         <div><button data-k="${k}" data-side="${esc(s)}" data-d="-1">−</button><output>${draft[s][k]}</output><button data-k="${k}" data-side="${esc(s)}" data-d="1">+</button></div></div>`).join("")}
-      <small>${cap} ที่ · มีรายชื่อ ${n} รายการ${cap < n ? " — ไม่พอ" : ""}</small></fieldset>`;
+      <small>${cap} ที่ · ต้องใช้อย่างน้อย ${n} ที่${cap < n ? " — ไม่พอ" : ""}</small></fieldset>`;
   }).join("");
 }
 $("cfgBtn").onclick = () => { if (!layout) return; draft = structuredClone(layout); drawCfg(); $("cfg").showModal(); };
