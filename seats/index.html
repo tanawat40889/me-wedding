@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fdeef3">
+<title>ตำแหน่งที่นั่ง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;800&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+[data-s="เจ้าสาว"]{--sc:#ad4568;--sbg:#fff5f8;--sline:#f5cfdc}
+[data-s="เจ้าบ่าว"]{--sc:#2f5f9e;--sbg:#f2f7ff;--sline:#cddcf3}
+:root{color-scheme:light;--card:#fff;--ink:#4a3b45;--mute:#6b5765;--line:#f0d9e2;--accent:#ad4568;--ok:#2f7a5b;--okbg:#e6f6ee;--shadow:0 2px 6px rgba(217,112,143,.08),0 8px 24px rgba(180,140,200,.1)}
+*{box-sizing:border-box;margin:0}
+body{min-height:100vh;background:linear-gradient(160deg,#fdeef3 0%,#f3eafc 45%,#e8f6f1 100%) fixed;color:var(--ink);font-family:Prompt,system-ui,sans-serif;line-height:1.5;padding:0 12px 40px}
+.wrap{max-width:1100px;margin:0 auto}
+header{padding:20px 4px 12px;display:flex;align-items:center;gap:12px}
+header a{color:var(--accent);text-decoration:none;font-weight:500;font-size:14px;white-space:nowrap}
+h1{font-family:Kanit,sans-serif;font-weight:800;color:#a8426a;font-size:clamp(20px,5.6vw,26px);flex:1;white-space:nowrap}
+.cfg-btn{font:inherit;font-size:14px;font-weight:500;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font-size:13px;color:var(--mute);margin-bottom:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-1px;margin-right:4px;border:1px solid var(--line);background:#fff}
+.legend i.in{background:var(--okbg);border-color:#8fd0ae}
+.stage{text-align:center;font-family:Kanit,sans-serif;font-weight:600;font-size:18px;letter-spacing:.2em;color:#fff;background:linear-gradient(90deg,#a8426a,#6d4fa8);border-radius:14px 14px 40px 40px;padding:14px;box-shadow:var(--shadow)}
+.hall{display:grid;grid-template-columns:1fr 18px 1fr;gap:6px;margin-top:16px;align-items:start}
+.aisle{align-self:stretch;border-left:2px dashed var(--line);margin-left:8px}
+.side h2{font-family:Kanit,sans-serif;font-weight:600;font-size:15px;color:var(--sc);text-align:center;margin-bottom:8px}
+.side h2 small{display:block;font-family:Prompt,sans-serif;font-weight:400;font-size:12px;color:var(--mute)}
+.rows{display:flex;flex-direction:column;gap:6px}
+.row{display:grid;gap:5px}
+.seat{container-type:inline-size;min-width:0;aspect-ratio:1/1.05;border-radius:10px;background:var(--sbg);border:1.5px solid var(--sline);padding:4px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;font:inherit;color:inherit}
+.seat b{font-family:Kanit,sans-serif;font-weight:600;font-size:clamp(13px,2.4vw,17px);color:var(--sc);line-height:1.1}
+.seat span{font-size:clamp(9px,1.5vw,12px);line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word;margin-top:2px}
+@container (max-width:54px){.seat span{display:none}}
+.seat.in{background:var(--okbg);border-color:#8fd0ae}
+.seat.in b{color:var(--ok)}
+.seat.empty{background:transparent;border-style:dashed;cursor:default}
+.over{margin-top:18px;padding:12px 14px;border-radius:14px;background:#fff8e6;border:1px solid #f1d58a;font-size:14px}
+.status{font-size:12px;color:var(--mute);text-align:center;margin-top:16px}
+dialog{margin:auto;border:0;border-radius:18px;padding:22px;width:min(92vw,420px);color:var(--ink);box-shadow:0 20px 60px rgba(74,59,69,.3)}
+dialog::backdrop{background:rgba(74,59,69,.35)}
+dialog h3{font-family:Kanit,sans-serif;font-weight:600;font-size:20px;white-space:pre-line;line-height:1.3}
+dialog p{color:var(--mute);font-size:14px;margin-top:4px}
+dialog .tag{display:inline-block;margin-top:10px;font-size:13px;font-weight:600;color:var(--sc);border:1px solid var(--sline);background:var(--sbg);border-radius:99px;padding:2px 12px}
+dialog .ok{color:var(--ok);font-weight:600;margin-top:8px}
+dialog .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+dialog button{font:inherit;font-weight:600;font-size:15px;padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+dialog button.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.cfg{display:grid;gap:14px;margin-top:12px}
+.cfg fieldset{border:1px solid var(--sline);border-radius:12px;padding:10px 12px}
+.cfg legend{font-weight:600;color:var(--sc);padding:0 6px}
+.step{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.step div{display:flex;align-items:center;gap:8px}
+.step button{width:40px;height:40px;padding:0;font-size:20px}
+.step output{min-width:28px;text-align:center;font-family:Kanit,sans-serif;font-weight:600;font-size:18px}
+.cfg small{color:var(--mute);font-size:12px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><a href="../">← หน้าหลัก</a><h1>ตำแหน่งที่นั่ง</h1><button class="cfg-btn" id="cfgBtn">ตั้งค่าเก้าอี้</button></header>
+  <div class="legend"><span><i></i>ยังไม่มา</span><span><i class="in"></i>มาแล้ว</span><span>แตะเก้าอี้เพื่อดูรายละเอียด</span></div>
+  <div class="stage">เวที</div>
+  <div class="hall" id="hall"></div>
+  <div id="over"></div>
+  <p class="status" id="status"></p>
+</div>
+
+<dialog id="info"><h3 id="iName"></h3><p id="iMeta"></p><div id="iTag"></div><div id="iOk"></div>
+  <div class="acts"><button id="iClose">ปิด</button></div></dialog>
+
+<dialog id="cfg"><h3>ตั้งค่าเก้าอี้</h3><p>จำนวนแถว (นับจากหน้าเวที) และเก้าอี้ต่อแถว ของแต่ละฝั่ง</p>
+  <div class="cfg" id="cfgBody"></div>
+  <div class="acts"><button id="cfgCancel">ยกเลิก</button><button class="pri" id="cfgSave">บันทึก</button></div></dialog>
+
+<script>
+const API = "https://rinnjtfrrkoajknoldoy.supabase.co/rest/v1/rpc/";
+const KEY = "sb_publishable_KGScT2bjpcoiDDAJQAUpbA_AnHdXb8S";
+// ซ้าย = เจ้าสาว, ขวา = เจ้าบ่าว (มองจากที่นั่งไปทางเวที)
+const SIDES = ["เจ้าสาว", "เจ้าบ่าว"];
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const short = n => n.split("\n")[0];
+const label = n => short(n).replace(/^คุณ\s*/, "");
+
+let guests = [], layout = null, lastOk = 0;
+
+async function rpc(fn, body = {}) {
+  const r = await fetch(API + fn, { method: "POST",
+    headers: { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" },
+    body: JSON.stringify(body) });
+  const d = await r.json().catch(() => null);
+  if (!r.ok) throw new Error(d?.message || r.statusText);
+  return d;
+}
+
+async function load() {
+  try {
+    [guests, layout] = await Promise.all([rpc("guests_list"), rpc("layout_get")]);
+    lastOk = Date.now(); render();
+  } catch { $("status").textContent = "เชื่อมต่อไม่ได้ กำลังลองใหม่…"; }
+}
+
+// จัดที่นั่งอัตโนมัติตามลำดับในชีต: แถวหน้าสุด (ติดเวที) ก่อน, ในแถวเริ่มจากเก้าอี้ติดทางเดินกลาง
+function seatMap(side) {
+  const { rows, cols } = layout[side], list = guests.filter(g => g.side === side).sort((a, b) => a.seq - b.seq);
+  const grid = Array.from({ length: rows }, (_, r) => Array.from({ length: cols }, (_, c) => list[r * cols + c] || null));
+  if (side === "เจ้าสาว") grid.forEach(row => row.reverse());  // ฝั่งซ้าย: ทางเดินอยู่ทางขวา
+  return { grid, over: list.slice(rows * cols) };
+}
+
+function render() {
+  if (!layout) return;
+  const overs = [];
+  const block = side => {
+    const { grid, over } = seatMap(side), n = guests.filter(g => g.side === side);
+    overs.push(...over);
+    return `<div class="side" data-s="${esc(side)}">
+      <h2>ฝั่ง${esc(side)}<small>มาแล้ว ${n.filter(g => g.arrived_at).length} / ${n.length} · ${layout[side].rows} แถว × ${layout[side].cols} ที่</small></h2>
+      <div class="rows">${grid.map(row => `<div class="row" style="grid-template-columns:repeat(${row.length},1fr)">${row.map(g => g
+        ? `<button class="seat ${g.arrived_at ? "in" : ""}" data-id="${g.id}"><b>${g.seq}</b><span>${esc(label(g.name))}</span></button>`
+        : `<div class="seat empty"></div>`).join("")}</div>`).join("")}</div></div>`;
+  };
+  $("hall").innerHTML = block(SIDES[0]) + `<div class="aisle"></div>` + block(SIDES[1]);
+  $("over").innerHTML = overs.length ? `<div class="over">⚠ เก้าอี้ไม่พอ ${overs.length} รายการ: ${overs.map(g => `ฝั่ง${esc(g.side)} ${g.seq} ${esc(short(g.name))}`).join(", ")} — กด "ตั้งค่าเก้าอี้" เพื่อเพิ่ม</div>` : "";
+  $("status").textContent = lastOk ? `อัปเดตล่าสุด ${new Date(lastOk).toLocaleTimeString("th-TH")} · รีเฟรชอัตโนมัติ` : "";
+}
+
+$("hall").onclick = e => {
+  const b = e.target.closest("[data-id]"); if (!b) return;
+  const g = guests.find(x => x.id === +b.dataset.id); if (!g) return;
+  const { grid } = seatMap(g.side);
+  const r = grid.findIndex(row => row.includes(g)), c = g.side === "เจ้าสาว" ? grid[r].length - grid[r].indexOf(g) : grid[r].indexOf(g) + 1;
+  $("info").dataset.s = g.side;
+  $("iName").textContent = g.name;
+  $("iMeta").textContent = [g.relation, `${g.gift} ${g.gift_qty} ชิ้น`, g.note].filter(Boolean).join(" · ");
+  $("iTag").innerHTML = `<span class="tag">ฝั่ง${esc(g.side)} · แถว ${r + 1} · ที่ ${c} (นับจากทางเดินกลาง)</span>`;
+  $("iOk").innerHTML = g.arrived_at ? `<p class="ok">มาแล้ว ${new Date(g.arrived_at).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</p>` : `<p>ยังไม่ได้เช็คชื่อ</p>`;
+  $("info").showModal();
+};
+$("iClose").onclick = () => $("info").close();
+
+let draft;
+function drawCfg() {
+  $("cfgBody").innerHTML = SIDES.map(s => {
+    const n = guests.filter(g => g.side === s).length, cap = draft[s].rows * draft[s].cols;
+    return `<fieldset data-s="${esc(s)}"><legend>ฝั่ง${esc(s)}</legend>
+      ${["rows", "cols"].map(k => `<div class="step"><span>${k === "rows" ? "จำนวนแถว" : "เก้าอี้ต่อแถว"}</span>
+        <div><button data-k="${k}" data-side="${esc(s)}" data-d="-1">−</button><output>${draft[s][k]}</output><button data-k="${k}" data-side="${esc(s)}" data-d="1">+</button></div></div>`).join("")}
+      <small>${cap} ที่ · มีรายชื่อ ${n} รายการ${cap < n ? " — ไม่พอ" : ""}</small></fieldset>`;
+  }).join("");
+}
+$("cfgBtn").onclick = () => { if (!layout) return; draft = structuredClone(layout); drawCfg(); $("cfg").showModal(); };
+$("cfgBody").onclick = e => {
+  const b = e.target.closest("[data-k]"); if (!b) return;
+  const v = draft[b.dataset.side][b.dataset.k] + +b.dataset.d;
+  draft[b.dataset.side][b.dataset.k] = Math.min(20, Math.max(1, v)); drawCfg();
+};
+$("cfgCancel").onclick = () => $("cfg").close();
+$("cfgSave").onclick = async () => {
+  $("cfgSave").disabled = true;
+  try {
+    for (const s of SIDES) if (draft[s].rows !== layout[s].rows || draft[s].cols !== layout[s].cols)
+      layout = await rpc("layout_set", { p_side: s, p_rows: draft[s].rows, p_cols: draft[s].cols });
+    render(); $("cfg").close();
+  } catch { alert("บันทึกไม่สำเร็จ ลองอีกครั้ง"); }
+  $("cfgSave").disabled = false;
+};
+
+document.addEventListener("visibilitychange", () => !document.hidden && load());
+load(); setInterval(() => !document.hidden && !$("cfg").open && load(), 4000);
+</script>
+</body>
+</html>
