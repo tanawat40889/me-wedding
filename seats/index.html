@@ -39,7 +39,7 @@ h1{font-family:Kanit,sans-serif;font-weight:800;color:#a8426a;font-size:clamp(20
 .status{font-size:12px;color:var(--mute);text-align:center;margin-top:16px}
 dialog{margin:auto;border:0;border-radius:18px;padding:22px;width:min(92vw,420px);color:var(--ink);box-shadow:0 20px 60px rgba(74,59,69,.3)}
 dialog::backdrop{background:rgba(74,59,69,.35)}
-dialog h3{font-family:Kanit,sans-serif;font-weight:600;font-size:20px;white-space:pre-line;line-height:1.3}
+dialog h2{font-family:Kanit,sans-serif;font-weight:600;font-size:20px;white-space:pre-line;line-height:1.3}
 dialog p{color:var(--mute);font-size:14px;margin-top:4px}
 dialog .tag{display:inline-block;margin-top:10px;font-size:13px;font-weight:600;color:var(--sc);border:1px solid var(--sline);background:var(--sbg);border-radius:99px;padding:2px 12px}
 dialog .ok{color:var(--ok);font-weight:600;margin-top:8px}
@@ -67,10 +67,10 @@ dialog button.pri{background:var(--accent);border-color:var(--accent);color:#fff
   <p class="status" id="status"></p>
 </div>
 
-<dialog id="info"><h3 id="iName"></h3><p id="iMeta"></p><div id="iTag"></div><div id="iOk"></div>
+<dialog id="info"><h2 id="iName"></h2><p id="iMeta"></p><div id="iTag"></div><div id="iOk"></div>
   <div class="acts"><button id="iClose">ปิด</button></div></dialog>
 
-<dialog id="cfg"><h3>ตั้งค่าเก้าอี้</h3><p>จำนวนแถว (นับจากหน้าเวที) และเก้าอี้ต่อแถว ของแต่ละฝั่ง</p>
+<dialog id="cfg"><h2>ตั้งค่าเก้าอี้</h2><p>จำนวนแถว (นับจากหน้าเวที) และเก้าอี้ต่อแถว ของแต่ละฝั่ง</p>
   <div class="cfg" id="cfgBody"></div>
   <div class="acts"><button id="cfgCancel">ยกเลิก</button><button class="pri" id="cfgSave">บันทึก</button></div></dialog>
 
