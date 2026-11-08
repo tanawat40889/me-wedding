@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;800&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+[data-s="เจ้าสาว"]{--sc:#ad4568;--sbg:#fff5f8;--sline:#f5cfdc;--stint:#fde8ef}
+[data-s="เจ้าบ่าว"]{--sc:#2f5f9e;--sbg:#f2f7ff;--sline:#cddcf3;--stint:#e4eefc}
 :root{color-scheme:light;--card:#fff;--ink:#4a3b45;--mute:#6b5765;--line:#f0d9e2;--accent:#ad4568;--ok:#2f7a5b;--okbg:#e6f6ee;--shadow:0 2px 6px rgba(217,112,143,.08),0 8px 24px rgba(180,140,200,.1)}
 *{box-sizing:border-box;margin:0}
 body{min-height:100vh;background:linear-gradient(160deg,#fdeef3 0%,#f3eafc 45%,#e8f6f1 100%) fixed;color:var(--ink);font-family:Prompt,system-ui,sans-serif;line-height:1.5;padding:0 16px 40px}
@@ -21,23 +23,24 @@ h1{font-family:Kanit,sans-serif;font-weight:800;color:#a8426a;font-size:clamp(20
 .tab{font:inherit;border:2px solid var(--line);background:var(--card);border-radius:14px;padding:10px;cursor:pointer;color:var(--ink);text-align:center}
 .tab b{display:block;font-family:Kanit,sans-serif;font-weight:600;font-size:18px}
 .tab small{color:var(--mute);font-size:13px}
-.tab.on{border-color:var(--accent);background:#fff5f8}
-.tab.on b{color:var(--accent)}
+.tab{border-color:var(--sline)}
+.tab b{color:var(--sc)}
+.tab.on{border-color:var(--sc);background:var(--stint);box-shadow:inset 0 0 0 1px var(--sc)}
 .prog{height:6px;border-radius:3px;background:var(--line);margin-top:6px;overflow:hidden}
 .prog i{display:block;height:100%;background:var(--ok);transition:width .3s}
 .tools{display:flex;gap:8px;margin-top:10px}
 .tools input{flex:1;min-width:0;font:inherit;font-size:16px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
 .tools select{font:inherit;font-size:15px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
 .list{display:flex;flex-direction:column;gap:10px;margin-top:6px}
-.g{display:flex;gap:12px;align-items:center;padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
-.g.in{background:var(--okbg);border-color:#bfe5d1;box-shadow:none}
+.g{display:flex;gap:12px;align-items:center;padding:14px;border-radius:16px;background:var(--sbg);border:1px solid var(--sline);border-left:5px solid var(--sc);box-shadow:var(--shadow)}
+.g.in{background:var(--okbg);border-color:#bfe5d1;border-left-color:var(--ok);box-shadow:none}
 .seq{font-family:Kanit,sans-serif;font-weight:600;color:var(--mute);min-width:26px;text-align:center}
 .info{flex:1;min-width:0}
 .name{font-weight:600;font-size:17px;white-space:pre-line}
 .meta{font-size:13px;color:var(--mute);margin-top:2px}
 .note{font-size:13px;color:var(--accent);margin-top:2px}
 .when{font-size:13px;color:var(--ok);font-weight:500;margin-top:2px}
-.chk{flex:none;font:inherit;font-weight:600;font-size:15px;min-width:92px;min-height:48px;border-radius:12px;cursor:pointer;border:2px solid var(--accent);background:#fff;color:var(--accent)}
+.chk{flex:none;font:inherit;font-weight:600;font-size:15px;min-width:92px;min-height:48px;border-radius:12px;cursor:pointer;border:2px solid var(--sc);background:#fff;color:var(--sc)}
 .g.in .chk{border-color:var(--ok);background:var(--ok);color:#fff}
 .chk:disabled{opacity:.5}
 .empty{text-align:center;color:var(--mute);padding:30px 0}
@@ -128,13 +131,14 @@ const time = t => new Date(t).toLocaleTimeString("th-TH", { hour: "2-digit", min
 function render() {
   $("tabs").innerHTML = SIDES.map(s => {
     const all = guests.filter(g => g.side === s), n = all.filter(g => g.arrived_at).length;
-    return `<button class="tab ${s === side ? "on" : ""}" data-side="${esc(s)}"><b>ฝั่ง${esc(s)}</b>
+    return `<button class="tab ${s === side ? "on" : ""}" data-side="${esc(s)}" data-s="${esc(s)}"><b>ฝั่ง${esc(s)}</b>
       <small>มาแล้ว ${n} / ${all.length}</small><div class="prog"><i style="width:${all.length ? n / all.length * 100 : 0}%"></i></div></button>`;
   }).join("");
   const q = $("q").value.trim().toLowerCase(), f = $("f").value;
   const rows = guests.filter(g => g.side === side
     && (!q || (g.name + " " + g.relation).toLowerCase().includes(q))
     && (f === "all" || (f === "yes") === !!g.arrived_at));
+  $("list").dataset.s = side;
   $("list").innerHTML = rows.length ? rows.map(g => `
     <div class="g ${g.arrived_at ? "in" : ""}">
       <div class="seq">${g.seq}</div>
