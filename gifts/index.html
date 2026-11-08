@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fdeef3">
+<title>แจกของรับไหว้</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;800&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+[data-s="เจ้าสาว"]{--sc:#ad4568;--sbg:#fff5f8;--sline:#f5cfdc}
+[data-s="เจ้าบ่าว"]{--sc:#2f5f9e;--sbg:#f2f7ff;--sline:#cddcf3}
+:root{color-scheme:light;--card:#fff;--ink:#4a3b45;--mute:#6b5765;--line:#f0d9e2;--accent:#ad4568;--ok:#2f7a5b;--okbg:#e6f6ee;
+ --glass:#0f6e78;--glassbg:#e3f6f7;--silk:#7a4aa8;--silkbg:#f1e9fb;--shadow:0 2px 6px rgba(217,112,143,.08),0 8px 24px rgba(180,140,200,.1)}
+*{box-sizing:border-box;margin:0}
+body{min-height:100vh;background:linear-gradient(160deg,#fdeef3 0%,#f3eafc 45%,#e8f6f1 100%) fixed;color:var(--ink);font-family:Prompt,system-ui,sans-serif;line-height:1.5;padding:0 16px 96px}
+.wrap{max-width:720px;margin:0 auto}
+header{padding:20px 0 12px;display:flex;align-items:center;gap:12px}
+header a{color:var(--accent);text-decoration:none;font-weight:500;font-size:14px;white-space:nowrap}
+h1{font-family:Kanit,sans-serif;font-weight:800;color:#a8426a;font-size:clamp(20px,5.6vw,26px);flex:1;white-space:nowrap}
+h2{font-family:Kanit,sans-serif;font-weight:600;font-size:17px;margin:22px 0 10px}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.box{padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.box small{display:block;color:var(--mute);font-size:13px}
+.box b{font-family:Kanit,sans-serif;font-weight:600;font-size:22px}
+.box.glass b{color:var(--glass)}.box.silk b{color:var(--silk)}
+.box em{font-style:normal;color:var(--mute);font-size:13px}
+.hint{color:var(--mute);font-size:13px;margin-top:8px}
+.now{margin-top:16px;padding:20px;border-radius:20px;background:var(--sbg);border:2px solid var(--sc);box-shadow:var(--shadow)}
+.round{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--mute)}
+.side{font-weight:600;color:var(--sc);background:#fff;border:1px solid var(--sline);border-radius:99px;padding:2px 12px;font-size:13px}
+.now .name{font-family:Kanit,sans-serif;font-weight:600;font-size:clamp(22px,6vw,30px);line-height:1.3;margin-top:6px;white-space:pre-line}
+.now .rel{color:var(--mute);font-size:14px}
+.note{font-size:14px;color:var(--accent);margin-top:4px}
+.gifts{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.gift{display:flex;align-items:baseline;gap:8px;padding:12px 18px;border-radius:14px;font-family:Kanit,sans-serif;font-weight:600}
+.gift span{font-size:22px}.gift b{font-size:34px;line-height:1}
+.gift.glass{background:var(--glassbg);color:var(--glass);border:2px solid #9fd8dd}
+.gift.silk{background:var(--silkbg);color:var(--silk);border:2px solid #cfb6ea}
+.give{width:100%;margin-top:18px;font:inherit;font-weight:600;font-size:19px;min-height:58px;border:0;border-radius:14px;background:var(--sc);color:#fff;cursor:pointer}
+.give:disabled{opacity:.5}
+.done-all{margin-top:16px;padding:28px 20px;border-radius:20px;background:var(--okbg);color:var(--ok);text-align:center;font-weight:600}
+.row{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;background:var(--sbg);border:1px solid var(--sline);border-left:4px solid var(--sc);margin-bottom:8px}
+.row .n{font-family:Kanit,sans-serif;font-weight:600;color:var(--mute);min-width:28px;text-align:center}
+.row .t{flex:1;min-width:0}
+.row .t div{font-weight:600;white-space:pre-line}
+.row .t small{color:var(--mute);font-size:13px}
+.chip{flex:none;font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px}
+.chip.glass{background:var(--glassbg);color:var(--glass)}.chip.silk{background:var(--silkbg);color:var(--silk)}
+.row.given{background:var(--okbg);border-color:#bfe5d1;border-left-color:var(--ok);opacity:.85}
+.row button{flex:none;font:inherit;font-size:13px;font-weight:600;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+details summary{cursor:pointer;font-family:Kanit,sans-serif;font-weight:600;font-size:17px;margin:22px 0 10px}
+.empty{color:var(--mute);font-size:14px}
+.status{font-size:12px;color:var(--mute);text-align:center;margin-top:16px}
+.undo{position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:5;width:min(92vw,560px);display:flex;align-items:center;gap:12px;padding:10px 10px 10px 18px;border-radius:14px;background:#4a3b45;color:#fff;box-shadow:0 8px 24px rgba(74,59,69,.3)}
+.undo span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}
+.undo button{flex:none;font:inherit;font-weight:600;font-size:15px;padding:10px 16px;border:0;border-radius:10px;background:#fff;color:#4a3b45;cursor:pointer}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><a href="../">← หน้าหลัก</a><h1>แจกของรับไหว้</h1></header>
+  <div id="app"></div>
+  <p class="status" id="status"></p>
+</div>
+<div class="undo" id="undo" hidden><span id="undoMsg"></span><button id="undoBtn">↩ ย้อนกลับ</button></div>
+
+<script>
+const API = "https://rinnjtfrrkoajknoldoy.supabase.co/rest/v1/rpc/";
+const KEY = "sb_publishable_KGScT2bjpcoiDDAJQAUpbA_AnHdXb8S";
+const ORDER = ["เจ้าสาว", "เจ้าบ่าว"];  // เจ้าสาวขึ้นเวทีก่อน
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const kind = g => g.gift === "ผ้าแพร" ? "silk" : "glass";
+const first = n => n.split("\n")[0];
+
+let guests = [], busy = new Set(), lastOk = 0;
+
+async function rpc(fn, body = {}) {
+  const r = await fetch(API + fn, { method: "POST",
+    headers: { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" },
+    body: JSON.stringify(body) });
+  const d = await r.json().catch(() => null);
+  if (!r.ok) throw new Error(d?.message || r.statusText);
+  return d;
+}
+
+async function load() {
+  try {
+    const d = await rpc("guests_list");
+    guests = d.map(g => busy.has(g.id) ? guests.find(x => x.id === g.id) || g : g);
+    lastOk = Date.now(); render();
+  } catch { $("status").textContent = "เชื่อมต่อไม่ได้ กำลังลองใหม่…"; }
+}
+
+async function give(id, on, undo = false) {
+  const g = guests.find(x => x.id === id); if (!g || busy.has(id)) return;
+  const prev = g.given_at;
+  busy.add(id); hideUndo();
+  g.given_at = on ? new Date().toISOString() : null; render();
+  try { Object.assign(g, await rpc("guest_give", { p_id: id, p_given: on })); if (!undo) showUndo(g, on); }
+  catch { g.given_at = prev; alert("บันทึกไม่สำเร็จ ลองอีกครั้ง"); }
+  busy.delete(id); render();
+}
+
+let undoId = null, undoOn = false, undoTimer;
+function showUndo(g, on) {
+  undoId = g.id; undoOn = on; clearTimeout(undoTimer);
+  $("undoMsg").textContent = `${on ? "✓ ส่งของให้" : "ยกเลิกส่งของ"} ${first(g.name)}`;
+  $("undo").hidden = false; undoTimer = setTimeout(hideUndo, 8000);
+}
+function hideUndo() { clearTimeout(undoTimer); $("undo").hidden = true; undoId = null; }
+
+const giftHTML = (g, cls = "gift") => `<div class="${cls} ${kind(g)}"><span>${esc(g.gift)}</span><b>× ${g.gift_qty}</b></div>`;
+const chip = g => `<span class="chip ${kind(g)}">${esc(g.gift)} × ${g.gift_qty}</span>`;
+const total = (list, gift) => list.filter(g => g.gift === gift).reduce((a, g) => a + g.gift_qty, 0);
+
+function render() {
+  const rounds = guests.filter(g => g.arrived_at)
+    .sort((a, b) => ORDER.indexOf(a.side) - ORDER.indexOf(b.side) || a.seq - b.seq);
+  rounds.forEach((g, i) => g.round = i + 1);
+  const todo = rounds.filter(g => !g.given_at), done = rounds.filter(g => g.given_at);
+  const notYet = guests.length - rounds.length;
+  const cur = todo[0];
+
+  const box = (gift, cls) => `<div class="box ${cls}"><small>${gift} ที่ต้องเตรียม</small>
+    <b>${total(todo, gift)}</b> <em>ชิ้น · ส่งแล้ว ${total(done, gift)}</em></div>`;
+
+  $("app").innerHTML = `
+    <div class="sum">${box("แก้ว", "glass")}${box("ผ้าแพร", "silk")}</div>
+    <p class="hint">มาแล้ว ${rounds.length} รอบ · ส่งแล้ว ${done.length} รอบ${notYet ? ` · ยังไม่มา ${notYet} รายการ (ซ่อนไว้)` : ""}</p>
+    ${cur ? `
+    <div class="now" data-s="${esc(cur.side)}">
+      <div class="round"><span>รอบที่ ${cur.round} · ส่งตอนนี้</span><span class="side">ฝั่ง${esc(cur.side)} ${cur.seq}</span></div>
+      <div class="name">${esc(cur.name)}</div>
+      ${cur.relation ? `<div class="rel">${esc(cur.relation)}</div>` : ""}
+      ${cur.note ? `<div class="note">${esc(cur.note)}</div>` : ""}
+      <div class="gifts">${giftHTML(cur)}</div>
+      <button class="give" data-give="${cur.id}" ${busy.has(cur.id) ? "disabled" : ""}>✓ ส่งขึ้นเวทีแล้ว</button>
+    </div>` : `<div class="done-all">${rounds.length ? "ส่งของครบทุกรอบที่มาแล้ว" : "ยังไม่มีใครเช็คชื่อว่ามาแล้ว"}</div>`}
+    <h2>รอบถัดไป (${Math.max(todo.length - 1, 0)})</h2>
+    ${todo.slice(1).map(g => `
+      <div class="row" data-s="${esc(g.side)}"><span class="n">${g.round}</span>
+        <div class="t"><div>${esc(g.name)}</div><small>ฝั่ง${esc(g.side)} ${g.seq}${g.relation ? " · " + esc(g.relation) : ""}</small></div>
+        ${chip(g)}</div>`).join("") || `<p class="empty">ไม่มี</p>`}
+    <details ${done.length ? "" : "hidden"}><summary>ส่งแล้ว (${done.length})</summary>
+      ${done.map(g => `
+        <div class="row given" data-s="${esc(g.side)}"><span class="n">${g.round}</span>
+          <div class="t"><div>${esc(g.name)}</div><small>ฝั่ง${esc(g.side)} ${g.seq}</small></div>
+          ${chip(g)}<button data-ungive="${g.id}">ยกเลิก</button></div>`).join("")}
+    </details>`;
+  $("status").textContent = lastOk ? `อัปเดตล่าสุด ${new Date(lastOk).toLocaleTimeString("th-TH")} · รีเฟรชอัตโนมัติ` : "";
+}
+
+// คงสถานะ <details> ไว้ตอน render ใหม่
+let openDone = false;
+document.addEventListener("toggle", e => { if (e.target.tagName === "DETAILS") openDone = e.target.open; }, true);
+const _render = render;
+render = () => { _render(); const d = document.querySelector("details"); if (d && openDone) d.open = true; };
+
+$("app").onclick = e => {
+  const a = e.target.closest("[data-give]"), b = e.target.closest("[data-ungive]");
+  if (a) give(+a.dataset.give, true); else if (b) give(+b.dataset.ungive, false);
+};
+$("undoBtn").onclick = () => { if (undoId != null) { const id = undoId, on = undoOn; hideUndo(); give(id, !on, true); } };
+document.addEventListener("visibilitychange", () => !document.hidden && load());
+
+load(); setInterval(() => !document.hidden && load(), 4000);
+</script>
+</body>
+</html>
