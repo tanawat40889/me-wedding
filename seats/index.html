@@ -52,6 +52,7 @@ h1{font-family:Kanit,sans-serif;font-weight:800;color:#a8426a;font-size:clamp(20
 .seat small{font-size:11px;color:var(--mute)}
 .seat.multi{background-image:repeating-linear-gradient(90deg,transparent 0 calc(var(--w) - 1px),var(--sline) calc(var(--w) - 1px) var(--w))}
 .seat.in.multi{background-image:repeating-linear-gradient(90deg,transparent 0 calc(var(--w) - 1px),#bfe5d1 calc(var(--w) - 1px) var(--w))}
+.seat.guest{border-style:dashed;border-width:2px}
 .seat.empty{background:transparent;border-style:dashed;cursor:default}
 .over{margin-top:18px;padding:12px 14px;border-radius:14px;background:#fff8e6;border:1px solid #f1d58a;font-size:14px}
 .status{font-size:12px;color:var(--mute);text-align:center;margin-top:16px}
@@ -135,51 +136,64 @@ async function load() {
 
 // จัดที่นั่งอัตโนมัติตามลำดับในชีต: แถวหน้าสุด (ติดเวที) ก่อน, ในแถวเริ่มจากเก้าอี้ติดทางเดินกลาง
 // รายการที่มาหลายคนนั่งติดกันในแถวเดียว ถ้าแถวนั้นเหลือที่ไม่พอจะขึ้นแถวใหม่
-function place(side) {
-  const { rows, cols } = layout[side], list = guests.filter(g => g.side === side).sort((a, b) => a.seq - b.seq);
-  const used = Array(rows).fill(0), parts = [], over = [];
-  let r = 0;
+// ถ้าฝั่งไหนเก้าอี้ไม่พอ คนที่เหลือจะไปนั่งที่ว่างของอีกฝั่ง (ต่อท้ายแถวหลัง)
+const other = s => s === SIDES[0] ? SIDES[1] : SIDES[0];
+function fill(area, list) {
+  const { rows, cols } = layout[area.side], left = [];
   for (const g of list) {
-    let k = g.seats || 1;
-    if (r < rows && k <= cols && cols - used[r] < k) r++;
+    let k = g.seats || 1, r = area.r;
+    if (r < rows && k <= cols && cols - area.used[r] < k) r++;
     const mine = [];
     while (k > 0 && r < rows) {
-      if (used[r] === cols) { r++; continue; }
-      const n = Math.min(k, cols - used[r]);
-      mine.push({ g, r, off: used[r], n }); used[r] += n; k -= n;
+      if (area.used[r] === cols) { r++; continue; }
+      const n = Math.min(k, cols - area.used[r]);
+      mine.push({ g, area: area.side, r, off: area.used[r], n }); area.used[r] += n; k -= n;
     }
-    if (k > 0) over.push(g);
-    parts.push(...mine);
+    if (k > 0) { mine.forEach(p => area.used[p.r] -= p.n); left.push(g); continue; }  // ไม่พอ: คืนที่ แล้วไปลองอีกฝั่ง
+    area.r = r; area.parts.push(...mine);
   }
-  return { rows, cols, parts, used, over, need: list.reduce((a, g) => a + (g.seats || 1), 0) };
+  return left;
 }
+function placeAll() {
+  const A = {};
+  for (const s of SIDES) A[s] = { side: s, r: 0, used: Array(layout[s].rows).fill(0), parts: [] };
+  const lists = Object.fromEntries(SIDES.map(s => [s, guests.filter(g => g.side === s).sort((a, b) => a.seq - b.seq)]));
+  const left = Object.fromEntries(SIDES.map(s => [s, fill(A[s], lists[s])]));
+  const over = SIDES.flatMap(s => fill(A[other(s)], left[s]));
+  const where = new Map();
+  for (const s of SIDES) for (const p of A[s].parts) { if (!where.has(p.g.id)) where.set(p.g.id, []); where.get(p.g.id).push(p); }
+  return { A, over, where };
+}
+const posOf = (P, g) => (P.where.get(g.id) || []);
+const posStr = ps => ps.map(p => `แถว ${p.r + 1} · ที่ ${p.off + 1}${p.n > 1 ? "–" + (p.off + p.n) : ""}`).join(", ");
+const areaName = a => `ฝั่ง${a === SIDES[0] ? "ซ้าย" : "ขวา"} (ฝั่ง${a})`;
 // คอลัมน์บนจอ: ฝั่งซ้าย (เจ้าสาว) ทางเดินอยู่ทางขวา จึงนับจากขวา
 const colStart = (side, cols, off, n) => side === "เจ้าสาว" ? cols - off - n + 1 : off + 1;
 
 function render() {
   if (!layout) return;
-  const overs = [];
-  const block = side => {
-    const { rows, cols, parts, used, over, need } = place(side), n = guests.filter(g => g.side === side);
-    overs.push(...over);
+  const P = placeAll();
+  const block = area => {
+    const { rows, cols } = layout[area], { parts, used } = P.A[area], n = guests.filter(g => g.side === area);
+    const need = n.reduce((a, g) => a + (g.seats || 1), 0), guestsHere = parts.filter(p => p.g.side !== area).length;
     const rowsHTML = Array.from({ length: rows }, (_, r) => {
       const mine = parts.filter(p => p.r === r);
-      const empties = Array.from({ length: cols - used[r] }, (_, e) => colStart(side, cols, used[r] + e, 1));
+      const empties = Array.from({ length: cols - used[r] }, (_, e) => colStart(area, cols, used[r] + e, 1));
       return `<div class="row" style="grid-template-columns:repeat(${cols},1fr)">${mine.map(p => `
-        <button class="seat ${p.g.arrived_at ? "in" : ""} ${p.n > 1 ? "multi" : ""}" data-id="${p.g.id}"
-          style="grid-column:${colStart(side, cols, p.off, p.n)} / span ${p.n};--w:calc(100% / ${p.n})">
+        <button class="seat ${p.g.arrived_at ? "in" : ""} ${p.n > 1 ? "multi" : ""} ${p.g.side !== area ? "guest" : ""}" data-id="${p.g.id}" data-s="${esc(p.g.side)}"
+          style="grid-column:${colStart(area, cols, p.off, p.n)} / span ${p.n};--w:calc(100% / ${p.n})">
           <b>${p.g.seq}</b><span>${esc(label(p.g.name))}</span>${p.n > 1 ? `<small>${p.n} ที่</small>` : ""}</button>`).join("")}
         ${empties.map(c => `<div class="seat empty" style="grid-column:${c}"></div>`).join("")}</div>`;
     }).join("");
-    return `<div class="side" data-s="${esc(side)}">
-      <h2>ฝั่ง${esc(side)}<small>มาแล้ว ${n.filter(g => g.arrived_at).length} / ${n.length} รายการ · ${need} คน · ${rows}×${cols} = ${rows * cols} ที่</small></h2>
+    return `<div class="side" data-s="${esc(area)}">
+      <h2>ฝั่ง${esc(area)}<small>มาแล้ว ${n.filter(g => g.arrived_at).length} / ${n.length} รายการ · ${need} คน · ${rows}×${cols} = ${rows * cols} ที่${guestsHere ? ` · มีฝั่ง${esc(other(area))}มานั่ง ${guestsHere}` : ""}</small></h2>
       <div class="rows">${rowsHTML}</div></div>`;
   };
   $("hall").innerHTML = block(SIDES[0]) + `<div class="aisle"></div>` + block(SIDES[1]);
-  $("over").innerHTML = overs.length ? `<div class="over">⚠ เก้าอี้ไม่พอ ${overs.length} รายการ: ${overs.map(g => `ฝั่ง${esc(g.side)} ${g.seq} ${esc(short(g.name))} (${g.seats} คน)`).join(", ")} — กด "ตั้งค่าเก้าอี้" เพื่อเพิ่ม</div>` : "";
+  $("over").innerHTML = P.over.length ? `<div class="over">⚠ เก้าอี้ไม่พอทั้งสองฝั่ง ${P.over.length} รายการ: ${P.over.map(g => `ฝั่ง${esc(g.side)} ${g.seq} ${esc(short(g.name))} (${g.seats} คน)`).join(", ")} — กด "ตั้งค่าเก้าอี้" เพื่อเพิ่ม</div>` : "";
   $("status").textContent = lastOk ? `อัปเดตล่าสุด ${new Date(lastOk).toLocaleTimeString("th-TH")} · รีเฟรชอัตโนมัติ` : "";
-  if ($("info").open) fillInfo();
-  renderList();
+  if ($("info").open) fillInfo(P);
+  renderList(P);
 }
 
 // ---------- แท็บ: ผัง / ค้นจากรายชื่อ ----------
@@ -192,22 +206,19 @@ function setView(v) {
 }
 document.querySelector(".views").onclick = e => { const b = e.target.closest("[data-view]"); if (b) setView(b.dataset.view); };
 
-const posText = g => {
-  const ps = place(g.side).parts.filter(p => p.g === g);
-  return ps.length ? ps.map(p => `แถว ${p.r + 1} · ที่ ${p.off + 1}${p.n > 1 ? "–" + (p.off + p.n) : ""}`).join(", ") : "ยังไม่มีที่นั่ง";
-};
-function renderList() {
+function renderList(P) {
   if (!layout) return;
+  P = P || placeAll();
   const q = $("q").value.trim().toLowerCase(), f = $("fs").value;
   const rows = guests.filter(g => g.arrived_at && (!f || g.side === f) && (!q || (g.name + " " + g.relation).toLowerCase().includes(q)))
     .sort((a, b) => SIDES.indexOf(a.side) - SIDES.indexOf(b.side) || a.seq - b.seq);
   $("plist").innerHTML = rows.length ? rows.map(g => `
     <button class="pg" data-s="${esc(g.side)}" data-go="${g.id}">
       <div class="t"><div>${esc(g.name)}</div><small>ฝั่ง${esc(g.side)} ${g.seq}${g.relation ? " · " + esc(g.relation) : ""}${g.seats > 1 ? ` · ${g.seats} คน` : ""}</small></div>
-      <div class="pos">${posText(g)}<small>ฝั่ง${g.side === "เจ้าสาว" ? "ซ้าย" : "ขวา"} · นับจากทางเดินกลาง</small></div>
+      ${(ps => `<div class="pos">${ps.length ? posStr(ps) : "ยังไม่มีที่นั่ง"}<small>${ps.length ? areaName(ps[0].area) : ""} · นับจากทางเดินกลาง</small></div>`)(posOf(P, g))}
     </button>`).join("") : `<p class="empty">${guests.some(g => g.arrived_at) ? "ไม่พบรายชื่อ" : "ยังไม่มีใครเช็คชื่อว่ามาแล้ว"}</p>`;
 }
-$("q").oninput = renderList; $("fs").onchange = renderList;
+$("q").oninput = () => renderList(); $("fs").onchange = () => renderList();
 // แตะรายชื่อ → ไปที่ผัง แล้วไฮไลต์เก้าอี้
 $("plist").onclick = e => {
   const b = e.target.closest("[data-go]"); if (!b) return;
@@ -217,14 +228,14 @@ $("plist").onclick = e => {
 };
 
 let infoId = null;
-function fillInfo() {
+function fillInfo(P) {
   const g = guests.find(x => x.id === infoId); if (!g) return;
-  const ps = place(g.side).parts.filter(p => p.g === g);
-  const where = ps.map(p => `แถว ${p.r + 1} ที่ ${p.off + 1}${p.n > 1 ? "–" + (p.off + p.n) : ""}`).join(", ") || "ยังไม่มีที่นั่ง (เก้าอี้ไม่พอ)";
+  const ps = posOf(P || placeAll(), g);
+  const where = ps.length ? `${areaName(ps[0].area)} · ${posStr(ps)}` : "ยังไม่มีที่นั่ง (เก้าอี้ไม่พอ)";
   $("info").dataset.s = g.side;
   $("iName").textContent = g.name;
   $("iMeta").textContent = [g.relation, `${g.gift} ${g.gift_qty} ชิ้น`, g.note].filter(Boolean).join(" · ");
-  $("iTag").innerHTML = `<span class="tag">ฝั่ง${esc(g.side)} · ${where} (นับจากทางเดินกลาง)</span>`;
+  $("iTag").innerHTML = `<span class="tag">${esc(g.side)} ${g.seq} · ${where} (นับจากทางเดินกลาง)</span>`;
   $("iOk").innerHTML = g.arrived_at ? `<p class="ok">มาแล้ว ${new Date(g.arrived_at).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</p>` : `<p>ยังไม่ได้เช็คชื่อ</p>`;
   $("sN").textContent = g.seats;
 }
