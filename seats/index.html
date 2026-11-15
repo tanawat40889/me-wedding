@@ -18,6 +18,21 @@ header{padding:20px 4px 12px;display:flex;align-items:center;gap:12px}
 header a{color:var(--accent);text-decoration:none;font-weight:500;font-size:14px;white-space:nowrap}
 h1{font-family:Kanit,sans-serif;font-weight:800;color:#a8426a;font-size:clamp(20px,5.6vw,26px);flex:1;white-space:nowrap}
 .cfg-btn{font:inherit;font-size:14px;font-weight:500;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.views{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px;border-radius:14px;background:rgba(255,255,255,.6);border:1px solid var(--line);margin-bottom:14px}
+.views button{font:inherit;font-weight:600;font-size:15px;padding:10px;border:0;border-radius:10px;background:transparent;color:var(--mute);cursor:pointer}
+.views button[aria-selected="true"]{background:#fff;color:#a8426a;box-shadow:0 1px 4px rgba(74,59,69,.12)}
+.tools{display:flex;gap:8px;margin-bottom:10px}
+.tools input{flex:1;min-width:0;font:inherit;font-size:16px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.tools select{font:inherit;font-size:15px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.pg{display:flex;gap:12px;align-items:center;width:100%;text-align:left;font:inherit;color:inherit;padding:12px 14px;margin-bottom:8px;border-radius:14px;background:var(--sbg);border:1px solid var(--sline);border-left:5px solid var(--sc);cursor:pointer}
+.pg .t{flex:1;min-width:0}
+.pg .t div{font-weight:600;white-space:pre-line}
+.pg .t small{color:var(--mute);font-size:13px}
+.pg .pos{flex:none;text-align:right;font-family:Kanit,sans-serif;font-weight:600;color:var(--sc);font-size:15px;line-height:1.3}
+.pg .pos small{display:block;font-family:Prompt,sans-serif;font-weight:400;color:var(--mute);font-size:12px}
+.empty{text-align:center;color:var(--mute);padding:24px 0}
+.seat.hl{outline:3px solid #e0a800;outline-offset:2px;animation:pulse 1s ease-in-out 3}
+@keyframes pulse{50%{outline-color:transparent}}
 .legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font-size:13px;color:var(--mute);margin-bottom:10px}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-1px;margin-right:4px;border:1px solid var(--line);background:#fff}
 .legend i.in{background:var(--okbg);border-color:#8fd0ae}
@@ -63,10 +78,21 @@ dialog button.pri{background:var(--accent);border-color:var(--accent);color:#fff
 <body>
 <div class="wrap">
   <header><a href="../">← หน้าหลัก</a><h1>ตำแหน่งที่นั่ง</h1><button class="cfg-btn" id="cfgBtn">ตั้งค่าเก้าอี้</button></header>
-  <div class="legend"><span><i></i>ยังไม่มา</span><span><i class="in"></i>มาแล้ว</span><span>แตะเก้าอี้เพื่อดูรายละเอียด</span></div>
-  <div class="stage">เวที</div>
-  <div class="hall" id="hall"></div>
-  <div id="over"></div>
+  <div class="views" role="tablist">
+    <button role="tab" data-view="map">ผังที่นั่ง</button>
+    <button role="tab" data-view="list">ค้นจากรายชื่อ</button>
+  </div>
+  <section id="vMap">
+    <div class="legend"><span><i></i>ยังไม่มา</span><span><i class="in"></i>มาแล้ว</span><span>แตะเก้าอี้เพื่อดูรายละเอียด</span></div>
+    <div class="stage">เวที</div>
+    <div class="hall" id="hall"></div>
+    <div id="over"></div>
+  </section>
+  <section id="vList" hidden>
+    <div class="tools"><input id="q" type="search" placeholder="ค้นหาชื่อคนที่มาแล้ว" autocomplete="off">
+      <select id="fs"><option value="">ทุกฝั่ง</option><option>เจ้าสาว</option><option>เจ้าบ่าว</option></select></div>
+    <div id="plist"></div>
+  </section>
   <p class="status" id="status"></p>
 </div>
 
@@ -153,7 +179,42 @@ function render() {
   $("over").innerHTML = overs.length ? `<div class="over">⚠ เก้าอี้ไม่พอ ${overs.length} รายการ: ${overs.map(g => `ฝั่ง${esc(g.side)} ${g.seq} ${esc(short(g.name))} (${g.seats} คน)`).join(", ")} — กด "ตั้งค่าเก้าอี้" เพื่อเพิ่ม</div>` : "";
   $("status").textContent = lastOk ? `อัปเดตล่าสุด ${new Date(lastOk).toLocaleTimeString("th-TH")} · รีเฟรชอัตโนมัติ` : "";
   if ($("info").open) fillInfo();
+  renderList();
 }
+
+// ---------- แท็บ: ผัง / ค้นจากรายชื่อ ----------
+const store = { get: k => { try { return localStorage.getItem(k) || ""; } catch { return ""; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+let view = store.get("seat-view") || "map";
+function setView(v) {
+  view = v; store.set("seat-view", v);
+  document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-selected", b.dataset.view === v));
+  $("vMap").hidden = v !== "map"; $("vList").hidden = v !== "list";
+}
+document.querySelector(".views").onclick = e => { const b = e.target.closest("[data-view]"); if (b) setView(b.dataset.view); };
+
+const posText = g => {
+  const ps = place(g.side).parts.filter(p => p.g === g);
+  return ps.length ? ps.map(p => `แถว ${p.r + 1} · ที่ ${p.off + 1}${p.n > 1 ? "–" + (p.off + p.n) : ""}`).join(", ") : "ยังไม่มีที่นั่ง";
+};
+function renderList() {
+  if (!layout) return;
+  const q = $("q").value.trim().toLowerCase(), f = $("fs").value;
+  const rows = guests.filter(g => g.arrived_at && (!f || g.side === f) && (!q || (g.name + " " + g.relation).toLowerCase().includes(q)))
+    .sort((a, b) => SIDES.indexOf(a.side) - SIDES.indexOf(b.side) || a.seq - b.seq);
+  $("plist").innerHTML = rows.length ? rows.map(g => `
+    <button class="pg" data-s="${esc(g.side)}" data-go="${g.id}">
+      <div class="t"><div>${esc(g.name)}</div><small>ฝั่ง${esc(g.side)} ${g.seq}${g.relation ? " · " + esc(g.relation) : ""}${g.seats > 1 ? ` · ${g.seats} คน` : ""}</small></div>
+      <div class="pos">${posText(g)}<small>ฝั่ง${g.side === "เจ้าสาว" ? "ซ้าย" : "ขวา"} · นับจากทางเดินกลาง</small></div>
+    </button>`).join("") : `<p class="empty">${guests.some(g => g.arrived_at) ? "ไม่พบรายชื่อ" : "ยังไม่มีใครเช็คชื่อว่ามาแล้ว"}</p>`;
+}
+$("q").oninput = renderList; $("fs").onchange = renderList;
+// แตะรายชื่อ → ไปที่ผัง แล้วไฮไลต์เก้าอี้
+$("plist").onclick = e => {
+  const b = e.target.closest("[data-go]"); if (!b) return;
+  setView("map");
+  const el = document.querySelector(`.seat[data-id="${b.dataset.go}"]`);
+  if (el) { el.classList.add("hl"); el.scrollIntoView({ block: "center", behavior: "smooth" }); setTimeout(() => el.classList.remove("hl"), 3200); }
+};
 
 let infoId = null;
 function fillInfo() {
@@ -210,6 +271,7 @@ $("cfgSave").onclick = async () => {
   $("cfgSave").disabled = false;
 };
 
+setView(view);
 document.addEventListener("visibilitychange", () => !document.hidden && load());
 load(); setInterval(() => !document.hidden && !$("cfg").open && load(), 4000);
 </script>
