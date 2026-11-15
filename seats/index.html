@@ -137,6 +137,7 @@ async function load() {
 // จัดที่นั่งอัตโนมัติตามลำดับในชีต: แถวหน้าสุด (ติดเวที) ก่อน, ในแถวเริ่มจากเก้าอี้ติดทางเดินกลาง
 // รายการที่มาหลายคนนั่งติดกันในแถวเดียว ถ้าแถวนั้นเหลือที่ไม่พอจะขึ้นแถวใหม่
 // ถ้าฝั่งไหนเก้าอี้ไม่พอ คนที่เหลือจะไปนั่งที่ว่างของอีกฝั่ง (ต่อท้ายแถวหลัง)
+const SKIP = "ไม่ต้องขึ้น";
 const other = s => s === SIDES[0] ? SIDES[1] : SIDES[0];
 function fill(area, list) {
   const { rows, cols } = layout[area.side], left = [];
@@ -157,9 +158,15 @@ function fill(area, list) {
 function placeAll() {
   const A = {};
   for (const s of SIDES) A[s] = { side: s, r: 0, used: Array(layout[s].rows).fill(0), parts: [] };
-  const lists = Object.fromEntries(SIDES.map(s => [s, guests.filter(g => g.side === s).sort((a, b) => a.seq - b.seq)]));
+  // คนที่ "ไม่ต้องขึ้น" (คอลัมน์กลุ่มที่ขึ้น) ไม่ต้องมีที่นั่งในผังรับไหว้
+  const lists = Object.fromEntries(SIDES.map(s => [s, guests.filter(g => g.side === s && g.grp !== SKIP).sort((a, b) => a.seq - b.seq)]));
   const left = Object.fromEntries(SIDES.map(s => [s, fill(A[s], lists[s])]));
-  const over = SIDES.flatMap(s => fill(A[other(s)], left[s]));
+  // คนที่ย้ายไปอีกฝั่ง เริ่มแถวใหม่ ไม่นั่งปนแถวเดียวกับญาติอีกฝั่ง
+  const over = SIDES.flatMap(s => {
+    if (!left[s].length) return [];
+    const a = A[other(s)]; if (a.used[a.r]) a.r++;
+    return fill(a, left[s]);
+  });
   const where = new Map();
   for (const s of SIDES) for (const p of A[s].parts) { if (!where.has(p.g.id)) where.set(p.g.id, []); where.get(p.g.id).push(p); }
   return { A, over, where };
@@ -174,7 +181,7 @@ function render() {
   if (!layout) return;
   const P = placeAll();
   const block = area => {
-    const { rows, cols } = layout[area], { parts, used } = P.A[area], n = guests.filter(g => g.side === area);
+    const { rows, cols } = layout[area], { parts, used } = P.A[area], n = guests.filter(g => g.side === area && g.grp !== SKIP);
     const need = n.reduce((a, g) => a + (g.seats || 1), 0), guestsHere = parts.filter(p => p.g.side !== area).length;
     const rowsHTML = Array.from({ length: rows }, (_, r) => {
       const mine = parts.filter(p => p.r === r);
@@ -210,7 +217,7 @@ function renderList(P) {
   if (!layout) return;
   P = P || placeAll();
   const q = $("q").value.trim().toLowerCase(), f = $("fs").value;
-  const rows = guests.filter(g => g.arrived_at && (!f || g.side === f) && (!q || (g.name + " " + g.relation).toLowerCase().includes(q)))
+  const rows = guests.filter(g => g.arrived_at && g.grp !== SKIP && (!f || g.side === f) && (!q || (g.name + " " + g.relation).toLowerCase().includes(q)))
     .sort((a, b) => SIDES.indexOf(a.side) - SIDES.indexOf(b.side) || a.seq - b.seq);
   $("plist").innerHTML = rows.length ? rows.map(g => `
     <button class="pg" data-s="${esc(g.side)}" data-go="${g.id}">
