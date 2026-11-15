@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fdeef3">
+<title>ค้นหาที่นั่ง · งานแต่ง อั๋น กอล์ฟ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;800&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+[data-s="เจ้าสาว"]{--sc:#ad4568;--sbg:#fff5f8;--sline:#f5cfdc}
+[data-s="เจ้าบ่าว"]{--sc:#2f5f9e;--sbg:#f2f7ff;--sline:#cddcf3}
+:root{color-scheme:light;--card:#fff;--ink:#4a3b45;--mute:#6b5765;--line:#f0d9e2;--shadow:0 2px 6px rgba(217,112,143,.08),0 8px 24px rgba(180,140,200,.1)}
+*{box-sizing:border-box;margin:0}
+body{min-height:100vh;background:linear-gradient(160deg,#fdeef3 0%,#f3eafc 45%,#e8f6f1 100%) fixed;color:var(--ink);font-family:Prompt,system-ui,sans-serif;line-height:1.5;padding:0 16px 40px}
+.wrap{max-width:560px;margin:0 auto}
+header{text-align:center;padding:36px 0 18px}
+h1{font-family:Kanit,sans-serif;font-weight:800;color:#a8426a;font-size:clamp(28px,8vw,40px);line-height:1.2}
+.sub{color:var(--mute);margin-top:6px}
+input{width:100%;font:inherit;font-size:18px;padding:14px 18px;border:2px solid var(--line);border-radius:16px;background:#fff;color:var(--ink);outline:none}
+input:focus{border-color:#d9708f}
+.res{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.r{display:flex;gap:12px;align-items:center;width:100%;text-align:left;font:inherit;color:inherit;padding:14px 16px;border-radius:14px;background:var(--sbg);border:1px solid var(--sline);border-left:5px solid var(--sc);cursor:pointer}
+.r .t{flex:1;min-width:0}
+.r .t div{font-weight:600;white-space:pre-line}
+.r .t small{color:var(--mute);font-size:13px}
+.r .go{flex:none;color:var(--sc);font-weight:600}
+.hint,.empty{text-align:center;color:var(--mute);font-size:14px;margin-top:14px}
+.card{margin-top:16px;padding:20px;border-radius:20px;background:#fff;border:2px solid var(--sc);box-shadow:var(--shadow)}
+.card .side{display:inline-block;font-size:13px;font-weight:600;color:var(--sc);background:var(--sbg);border:1px solid var(--sline);border-radius:99px;padding:2px 12px}
+.card h2{font-family:Kanit,sans-serif;font-weight:600;font-size:clamp(20px,5.5vw,26px);line-height:1.3;margin-top:8px;white-space:pre-line}
+.where{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;text-align:center}
+.where div{padding:10px 4px;border-radius:12px;background:var(--sbg)}
+.where small{display:block;color:var(--mute);font-size:12px}
+.where b{font-family:Kanit,sans-serif;font-weight:600;font-size:clamp(18px,5vw,24px);color:var(--sc)}
+.how{margin-top:10px;font-size:14px;color:var(--mute)}
+.map{margin-top:16px}
+.stage{text-align:center;font-family:Kanit,sans-serif;font-weight:600;letter-spacing:.2em;color:#fff;background:linear-gradient(90deg,#a8426a,#6d4fa8);border-radius:10px 10px 26px 26px;padding:8px;font-size:14px}
+.you{font-size:12px;color:var(--mute);text-align:center;margin-top:4px}
+.hall{display:grid;grid-template-columns:1fr 10px 1fr;gap:4px;margin-top:10px}
+.aisle{border-left:2px dashed var(--line);margin-left:4px}
+.lbl{text-align:center;font-size:12px;font-weight:600;color:var(--sc);margin-bottom:4px}
+.row{display:grid;gap:3px;grid-auto-rows:22px;margin-bottom:3px}
+.seat{grid-row:1;border-radius:5px;background:#f4eef2;border:1px solid #e9dde5}
+.seat.empty{background:transparent;border-style:dashed}
+.seat.me{background:var(--sc);border-color:var(--sc);box-shadow:0 0 0 3px rgba(224,168,0,.6);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(224,168,0,.15)}}
+.back{display:block;margin:14px auto 0;font:inherit;font-weight:600;font-size:15px;padding:10px 18px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>ค้นหาที่นั่งของคุณ</h1><p class="sub">งานแต่ง อั๋น กอล์ฟ · พิมพ์ชื่อเพื่อดูที่นั่ง</p></header>
+  <section id="search">
+    <input id="q" type="search" placeholder="พิมพ์ชื่อ เช่น ประพันธ์ หรือ ลุงเฮี้ยง" autocomplete="off" enterkeyhint="search">
+    <div class="res" id="res"></div>
+    <p class="hint" id="hint">พิมพ์อย่างน้อย 1 ตัวอักษร</p>
+  </section>
+  <section id="detail" hidden>
+    <div class="card" id="card"></div>
+    <div class="map" id="map"></div>
+    <button class="back" id="back">← ค้นหาชื่ออื่น</button>
+  </section>
+</div>
+
+<script src="../assets/seating.js"></script>
+<script>
+const API = "https://rinnjtfrrkoajknoldoy.supabase.co/rest/v1/rpc/";
+const KEY = "sb_publishable_KGScT2bjpcoiDDAJQAUpbA_AnHdXb8S";
+const { SIDES, SKIP, ICON, colStart } = Seating;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const norm = s => s.toLowerCase().replace(/คุณ|\s/g, "");
+
+let guests = [], layout = null, P = null, cur = null;
+
+async function rpc(fn) {
+  const r = await fetch(API + fn, { method: "POST",
+    headers: { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" }, body: "{}" });
+  if (!r.ok) throw new Error(r.statusText);
+  return r.json();
+}
+async function load() {
+  try {
+    [guests, layout] = await Promise.all([rpc("guests_list"), rpc("layout_get")]);
+    P = Seating.placeAll(guests, layout);
+    search(); if (cur) show(cur);
+  } catch { $("hint").textContent = "เชื่อมต่อไม่ได้ ลองรีเฟรชอีกครั้ง"; }
+}
+
+function search() {
+  const q = norm($("q").value);
+  if (!q) { $("res").innerHTML = ""; $("hint").textContent = "พิมพ์อย่างน้อย 1 ตัวอักษร"; return; }
+  const rows = guests.filter(g => g.grp !== SKIP && P?.where.has(g.id) && norm(g.name + g.relation).includes(q))
+    .sort((a, b) => SIDES.indexOf(a.side) - SIDES.indexOf(b.side) || a.seq - b.seq).slice(0, 20);
+  $("res").innerHTML = rows.map(g => `<button class="r" data-s="${esc(g.side)}" data-id="${g.id}">
+    <div class="t"><div>${esc(g.name)}</div><small>${ICON[g.side]} ญาติฝั่ง${esc(g.side)}</small></div><span class="go">ดูที่นั่ง →</span></button>`).join("");
+  $("hint").textContent = rows.length ? "" : "ไม่พบชื่อนี้ ลองพิมพ์ชื่อเล่นหรือชื่อจริงบางส่วน หรือสอบถามเจ้าหน้าที่";
+}
+
+function show(id) {
+  const g = guests.find(x => x.id === id); if (!g) return back();
+  cur = id;
+  const ps = P.where.get(g.id) || [], p = ps[0];
+  const area = p.area, isLeft = area === SIDES[0];
+  $("card").dataset.s = g.side;
+  $("card").innerHTML = `<span class="side">${ICON[g.side]} ญาติฝั่ง${esc(g.side)}</span><h2>${esc(g.name)}</h2>
+    <div class="where" data-s="${esc(g.side)}">
+      <div><small>ฝั่ง</small><b>${isLeft ? "ซ้าย" : "ขวา"}</b></div>
+      <div><small>แถวที่</small><b>${p.r + 1}</b></div>
+      <div><small>เก้าอี้ที่</small><b>${ps.map(q => q.off + 1 + (q.n > 1 ? "–" + (q.off + q.n) : "")).join(", ")}</b></div>
+    </div>
+    <p class="how">หันหน้าเข้าเวที ฝั่ง${isLeft ? "ซ้ายมือ" : "ขวามือ"} · แถวที่ 1 คือแถวติดเวที · เก้าอี้ที่ 1 คือตัวที่ติดทางเดินกลาง</p>`;
+  const block = s => {
+    const { rows, cols } = layout[s], A = P.A[s];
+    return `<div data-s="${esc(s)}"><div class="lbl">${isLeft === (s === SIDES[0]) ? "▼ " : ""}ฝั่ง${s === SIDES[0] ? "ซ้าย" : "ขวา"}</div>` +
+      Array.from({ length: rows }, (_, r) => `<div class="row" style="grid-template-columns:repeat(${cols},1fr)">` +
+        A.parts.filter(q => q.r === r).map(q => `<div class="seat ${q.g.id === g.id ? "me" : ""}" data-s="${esc(q.g.side)}" style="grid-column:${colStart(s, cols, q.off, q.n)} / span ${q.n}"></div>`).join("") +
+        Array.from({ length: cols - A.used[r] }, (_, e) => `<div class="seat empty" style="grid-column:${colStart(s, cols, A.used[r] + e, 1)}"></div>`).join("") +
+      `</div>`).join("") + `</div>`;
+  };
+  $("map").innerHTML = `<div class="stage">เวที</div><p class="you">ผังที่นั่ง · ช่องที่กะพริบคือที่นั่งของคุณ</p>
+    <div class="hall">${block(SIDES[0])}<div class="aisle"></div>${block(SIDES[1])}</div>`;
+  $("search").hidden = true; $("detail").hidden = false; scrollTo(0, 0);
+}
+function back() { cur = null; $("detail").hidden = true; $("search").hidden = false; $("q").focus(); }
+
+$("q").oninput = search;
+$("res").onclick = e => { const b = e.target.closest("[data-id]"); if (b) show(+b.dataset.id); };
+$("back").onclick = back;
+load(); setInterval(() => !document.hidden && load(), 30000);
+</script>
+</body>
+</html>

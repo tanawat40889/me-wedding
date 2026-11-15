@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR ดูที่นั่ง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;800&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{color-scheme:light;--ink:#4a3b45;--mute:#6b5765;--line:#f0d9e2}
+*{box-sizing:border-box;margin:0}
+body{min-height:100vh;background:linear-gradient(160deg,#fdeef3 0%,#f3eafc 45%,#e8f6f1 100%) fixed;color:var(--ink);font-family:Prompt,system-ui,sans-serif;padding:16px}
+.bar{max-width:640px;margin:0 auto 16px;display:flex;gap:10px;align-items:center}
+.bar a{color:#ad4568;text-decoration:none;font-weight:500;font-size:14px}
+.bar span{flex:1}
+.bar button{font:inherit;font-weight:600;font-size:15px;padding:10px 18px;border:0;border-radius:12px;background:#ad4568;color:#fff;cursor:pointer}
+.poster{max-width:640px;margin:0 auto;background:#fff;border-radius:24px;padding:48px 32px;text-align:center;box-shadow:0 10px 40px rgba(180,140,200,.18)}
+.poster small{display:block;color:var(--mute);font-size:16px;letter-spacing:.1em}
+.poster h1{font-family:Kanit,sans-serif;font-weight:800;color:#a8426a;font-size:clamp(34px,8vw,52px);line-height:1.15;margin-top:6px}
+.poster p{font-size:clamp(17px,3.5vw,22px);margin-top:10px}
+#qr{display:inline-block;margin-top:28px;padding:16px;border:2px solid var(--line);border-radius:20px}
+#qr img,#qr canvas{display:block;width:min(64vw,320px)!important;height:auto!important}
+.url{margin-top:16px;color:var(--mute);font-size:14px;word-break:break-all}
+.icons{font-size:34px;margin-top:20px}
+@media print{body{background:#fff;padding:0}.bar{display:none}.poster{box-shadow:none;max-width:none;padding:24mm 16mm}}
+</style>
+</head>
+<body>
+<div class="bar"><a href="../">← หน้าหลัก</a><span></span><button onclick="print()">พิมพ์</button></div>
+<div class="poster">
+  <small>งานแต่ง อั๋น กอล์ฟ</small>
+  <h1>สแกนเพื่อดูที่นั่ง</h1>
+  <p>สำหรับผู้ใหญ่ที่ขึ้นรับไหว้</p>
+  <div id="qr"></div>
+  <p class="url" id="url"></p>
+  <div class="icons">👰 🤵</div>
+</div>
+<script>
+const url = new URL("../find/", location.href).href;
+new QRCode(document.getElementById("qr"), { text: url, width: 640, height: 640, correctLevel: QRCode.CorrectLevel.M });
+document.getElementById("url").textContent = url.replace(/^https?:\/\//, "");
+</script>
+</body>
+</html>
