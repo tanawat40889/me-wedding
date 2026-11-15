@@ -140,7 +140,7 @@ function render() {
       <div class="seq">${g.seq}</div>
       <div class="info">
         <div class="name">${esc(g.name)}</div>
-        <div class="meta">${[g.relation, `${g.gift} ${g.gift_qty} ชิ้น`].filter(Boolean).map(esc).join(" · ")}</div>
+        <div class="meta">${[g.relation, g.grp, `${g.gift} ${g.gift_qty} ชิ้น`].filter(Boolean).map(esc).join(" · ")}</div>
         ${g.note ? `<div class="note">${esc(g.note)}</div>` : ""}
         ${g.arrived_at ? `<div class="when">มาแล้ว ${time(g.arrived_at)}</div>` : ""}
       </div>

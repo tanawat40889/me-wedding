@@ -29,6 +29,7 @@ h2{font-family:Kanit,sans-serif;font-weight:600;font-size:17px;margin:22px 0 10p
 .now{margin-top:16px;padding:20px;border-radius:20px;background:var(--sbg);border:2px solid var(--sc);box-shadow:var(--shadow)}
 .round{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--mute)}
 .side{font-weight:600;color:var(--sc);background:#fff;border:1px solid var(--sline);border-radius:99px;padding:2px 12px;font-size:13px}
+.now .name div+div{margin-top:2px}
 .now .name{font-family:Kanit,sans-serif;font-weight:600;font-size:clamp(22px,6vw,30px);line-height:1.3;margin-top:6px;white-space:pre-line}
 .now .rel{color:var(--mute);font-size:14px}
 .note{font-size:14px;color:var(--accent);margin-top:4px}
@@ -45,7 +46,8 @@ h2{font-family:Kanit,sans-serif;font-weight:600;font-size:17px;margin:22px 0 10p
 .row .t{flex:1;min-width:0}
 .row .t div{font-weight:600;white-space:pre-line}
 .row .t small{color:var(--mute);font-size:13px}
-.chip{flex:none;font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px}
+.cs{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+.chip{flex:none;white-space:nowrap;font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px}
 .chip.glass{background:var(--glassbg);color:var(--glass)}.chip.silk{background:var(--silkbg);color:var(--silk)}
 .row.given{background:var(--okbg);border-color:#bfe5d1;border-left-color:var(--ok);opacity:.85}
 .row button{flex:none;font:inherit;font-size:13px;font-weight:600;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
@@ -94,61 +96,87 @@ async function load() {
   } catch { $("status").textContent = "เชื่อมต่อไม่ได้ กำลังลองใหม่…"; }
 }
 
-async function give(id, on, undo = false) {
-  const g = guests.find(x => x.id === id); if (!g || busy.has(id)) return;
-  const prev = g.given_at;
-  busy.add(id); hideUndo();
-  g.given_at = on ? new Date().toISOString() : null; render();
-  try { Object.assign(g, await rpc("guest_give", { p_id: id, p_given: on })); if (!undo) showUndo(g, on); }
-  catch { g.given_at = prev; alert("บันทึกไม่สำเร็จ ลองอีกครั้ง"); }
-  busy.delete(id); render();
+// ส่งของทั้งรอบ (ทุกคนในกลุ่มที่มาแล้ว) ทีเดียว
+async function give(ids, on, undo = false) {
+  ids = ids.filter(id => !busy.has(id)); if (!ids.length) return;
+  const gs = ids.map(id => guests.find(x => x.id === id)).filter(Boolean), prev = gs.map(g => g.given_at);
+  ids.forEach(id => busy.add(id)); hideUndo();
+  gs.forEach(g => g.given_at = on ? new Date().toISOString() : null); render();
+  try {
+    const res = await Promise.all(ids.map(id => rpc("guest_give", { p_id: id, p_given: on })));
+    res.forEach((r, k) => Object.assign(gs[k], r));
+    if (!undo) showUndo(ids, gs, on);
+  } catch { gs.forEach((g, k) => g.given_at = prev[k]); alert("บันทึกไม่สำเร็จ ลองอีกครั้ง"); }
+  ids.forEach(id => busy.delete(id)); render();
 }
 
-let undoId = null, undoOn = false, undoTimer;
-function showUndo(g, on) {
-  undoId = g.id; undoOn = on; clearTimeout(undoTimer);
-  $("undoMsg").textContent = `${on ? "✓ ส่งของให้" : "ยกเลิกส่งของ"} ${first(g.name)}`;
+let undoIds = null, undoOn = false, undoTimer;
+function showUndo(ids, gs, on) {
+  undoIds = ids; undoOn = on; clearTimeout(undoTimer);
+  $("undoMsg").textContent = `${on ? "✓ ส่งของให้" : "ยกเลิกส่งของ"} ${first(gs[0].name)}${gs.length > 1 ? ` และอีก ${gs.length - 1} คน` : ""}`;
   $("undo").hidden = false; undoTimer = setTimeout(hideUndo, 8000);
 }
-function hideUndo() { clearTimeout(undoTimer); $("undo").hidden = true; undoId = null; }
+function hideUndo() { clearTimeout(undoTimer); $("undo").hidden = true; undoIds = null; }
 
-const giftHTML = (g, cls = "gift") => `<div class="${cls} ${kind(g)}"><span>${esc(g.gift)}</span><b>× ${g.gift_qty}</b></div>`;
-const chip = g => `<span class="chip ${kind(g)}">${esc(g.gift)} × ${g.gift_qty}</span>`;
-const total = (list, gift) => list.filter(g => g.gift === gift).reduce((a, g) => a + g.gift_qty, 0);
+// รวมของในรอบ เช่น แก้ว × 1 + ผ้าแพร × 1
+const sumGifts = ms => ["แก้ว", "ผ้าแพร"].map(t => [t, ms.filter(g => g.gift === t).reduce((a, g) => a + g.gift_qty, 0)]).filter(([, n]) => n);
+const cls = t => t === "ผ้าแพร" ? "silk" : "glass";
+const giftHTML = ms => sumGifts(ms).map(([t, n]) => `<div class="gift ${cls(t)}"><span>${t}</span><b>× ${n}</b></div>`).join("");
+const chips = ms => sumGifts(ms).map(([t, n]) => `<span class="chip ${cls(t)}">${t} × ${n}</span>`).join("");
+const total = (rs, t) => rs.reduce((a, r) => a + r.ms.filter(g => g.gift === t).reduce((b, g) => b + g.gift_qty, 0), 0);
+const SKIP = "ไม่ต้องขึ้น";
+
+// รอบ = กลุ่มที่ขึ้นเวทีด้วยกัน (คอลัมน์ "กลุ่มที่ขึ้น" ในชีต) ถ้าไม่มีกลุ่ม = 1 รายการ 1 รอบ
+function buildRounds() {
+  const map = new Map();
+  for (const g of guests) {
+    if (g.grp === SKIP) continue;
+    const key = g.side + "|" + (g.grp || "#" + g.seq);
+    if (!map.has(key)) map.set(key, { side: g.side, grp: g.grp, all: [] });
+    map.get(key).all.push(g);
+  }
+  return [...map.values()]
+    .map(r => ({ ...r, first: Math.min(...r.all.map(g => g.seq)), ms: r.all.filter(g => g.arrived_at).sort((a, b) => a.seq - b.seq) }))
+    .filter(r => r.ms.length)
+    .sort((a, b) => ORDER.indexOf(a.side) - ORDER.indexOf(b.side) || a.first - b.first)
+    .map((r, i) => ({ ...r, no: i + 1, given: r.ms.every(g => g.given_at), missing: r.all.length - r.ms.length }));
+}
+
+const names = r => r.ms.map(g => `<div>${esc(g.name)}</div>`).join("");
+const tag = r => `ฝั่ง${esc(r.side)}${r.grp ? " · " + esc(r.grp) : " " + r.first}`;
 
 function render() {
-  const rounds = guests.filter(g => g.arrived_at)
-    .sort((a, b) => ORDER.indexOf(a.side) - ORDER.indexOf(b.side) || a.seq - b.seq);
-  rounds.forEach((g, i) => g.round = i + 1);
-  const todo = rounds.filter(g => !g.given_at), done = rounds.filter(g => g.given_at);
-  const notYet = guests.length - rounds.length;
+  const rounds = buildRounds(), todo = rounds.filter(r => !r.given), done = rounds.filter(r => r.given);
+  const arrived = guests.filter(g => g.arrived_at && g.grp !== SKIP).length;
+  const notYet = guests.filter(g => !g.arrived_at && g.grp !== SKIP).length, skip = guests.filter(g => g.grp === SKIP).length;
   const cur = todo[0];
 
-  const box = (gift, cls) => `<div class="box ${cls}"><small>${gift} ที่ต้องเตรียม</small>
-    <b>${total(todo, gift)}</b> <em>ชิ้น · ส่งแล้ว ${total(done, gift)}</em></div>`;
+  const box = (t, c) => `<div class="box ${c}"><small>${t} ที่ต้องเตรียม</small>
+    <b>${total(todo, t)}</b> <em>ชิ้น · ส่งแล้ว ${total(done, t)}</em></div>`;
 
   $("app").innerHTML = `
     <div class="sum">${box("แก้ว", "glass")}${box("ผ้าแพร", "silk")}</div>
-    <p class="hint">มาแล้ว ${rounds.length} รอบ · ส่งแล้ว ${done.length} รอบ${notYet ? ` · ยังไม่มา ${notYet} รายการ (ซ่อนไว้)` : ""}</p>
+    <p class="hint">${rounds.length} รอบ (มาแล้ว ${arrived} รายการ) · ส่งแล้ว ${done.length} รอบ${notYet ? ` · ยังไม่มา ${notYet} รายการ (ซ่อนไว้)` : ""}${skip ? ` · ไม่ต้องขึ้นเวที ${skip}` : ""}</p>
     ${cur ? `
     <div class="now" data-s="${esc(cur.side)}">
-      <div class="round"><span>รอบที่ ${cur.round} · ส่งตอนนี้</span><span class="side">ฝั่ง${esc(cur.side)} ${cur.seq}</span></div>
-      <div class="name">${esc(cur.name)}</div>
-      ${cur.relation ? `<div class="rel">${esc(cur.relation)}</div>` : ""}
-      ${cur.note ? `<div class="note">${esc(cur.note)}</div>` : ""}
-      <div class="gifts">${giftHTML(cur)}</div>
-      <button class="give" data-give="${cur.id}" ${busy.has(cur.id) ? "disabled" : ""}>✓ ส่งขึ้นเวทีแล้ว</button>
+      <div class="round"><span>รอบที่ ${cur.no} · ส่งตอนนี้</span><span class="side">${tag(cur)}</span></div>
+      <div class="name">${names(cur)}</div>
+      ${cur.ms.length === 1 && cur.ms[0].relation ? `<div class="rel">${esc(cur.ms[0].relation)}</div>` : ""}
+      ${cur.ms.filter(g => g.note).map(g => `<div class="note">${esc(g.note)}</div>`).join("")}
+      ${cur.missing ? `<div class="note">ในกลุ่มนี้ยังไม่มา ${cur.missing} รายการ</div>` : ""}
+      <div class="gifts">${giftHTML(cur.ms)}</div>
+      <button class="give" data-give="${cur.ms.map(g => g.id).join(",")}" ${cur.ms.some(g => busy.has(g.id)) ? "disabled" : ""}>✓ ส่งขึ้นเวทีแล้ว</button>
     </div>` : `<div class="done-all">${rounds.length ? "ส่งของครบทุกรอบที่มาแล้ว" : "ยังไม่มีใครเช็คชื่อว่ามาแล้ว"}</div>`}
     <h2>รอบถัดไป (${Math.max(todo.length - 1, 0)})</h2>
-    ${todo.slice(1).map(g => `
-      <div class="row" data-s="${esc(g.side)}"><span class="n">${g.round}</span>
-        <div class="t"><div>${esc(g.name)}</div><small>ฝั่ง${esc(g.side)} ${g.seq}${g.relation ? " · " + esc(g.relation) : ""}</small></div>
-        ${chip(g)}</div>`).join("") || `<p class="empty">ไม่มี</p>`}
+    ${todo.slice(1).map(r => `
+      <div class="row" data-s="${esc(r.side)}"><span class="n">${r.no}</span>
+        <div class="t">${names(r)}<small>${tag(r)}</small></div>
+        <div class="cs">${chips(r.ms)}</div></div>`).join("") || `<p class="empty">ไม่มี</p>`}
     <details ${done.length ? "" : "hidden"}><summary>ส่งแล้ว (${done.length})</summary>
-      ${done.map(g => `
-        <div class="row given" data-s="${esc(g.side)}"><span class="n">${g.round}</span>
-          <div class="t"><div>${esc(g.name)}</div><small>ฝั่ง${esc(g.side)} ${g.seq}</small></div>
-          ${chip(g)}<button data-ungive="${g.id}">ยกเลิก</button></div>`).join("")}
+      ${done.map(r => `
+        <div class="row given" data-s="${esc(r.side)}"><span class="n">${r.no}</span>
+          <div class="t">${names(r)}<small>${tag(r)}</small></div>
+          <div class="cs">${chips(r.ms)}</div><button data-ungive="${r.ms.map(g => g.id).join(",")}">ยกเลิก</button></div>`).join("")}
     </details>`;
   $("status").textContent = lastOk ? `อัปเดตล่าสุด ${new Date(lastOk).toLocaleTimeString("th-TH")} · รีเฟรชอัตโนมัติ` : "";
 }
@@ -161,9 +189,10 @@ render = () => { _render(); const d = document.querySelector("details"); if (d &
 
 $("app").onclick = e => {
   const a = e.target.closest("[data-give]"), b = e.target.closest("[data-ungive]");
-  if (a) give(+a.dataset.give, true); else if (b) give(+b.dataset.ungive, false);
+  const ids = el => el.split(",").map(Number);
+  if (a) give(ids(a.dataset.give), true); else if (b) give(ids(b.dataset.ungive), false);
 };
-$("undoBtn").onclick = () => { if (undoId != null) { const id = undoId, on = undoOn; hideUndo(); give(id, !on, true); } };
+$("undoBtn").onclick = () => { if (undoIds) { const ids = undoIds, on = undoOn; hideUndo(); give(ids, !on, true); } };
 document.addEventListener("visibilitychange", () => !document.hidden && load());
 
 load(); setInterval(() => !document.hidden && load(), 4000);
