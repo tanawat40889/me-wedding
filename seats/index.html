@@ -52,6 +52,8 @@ h1{font-family:Kanit,sans-serif;font-weight:800;color:#a8426a;font-size:clamp(20
 .seat small{font-size:11px;color:var(--mute)}
 .seat.multi{background-image:repeating-linear-gradient(90deg,transparent 0 calc(var(--w) - 1px),var(--sline) calc(var(--w) - 1px) var(--w))}
 .seat.in.multi{background-image:repeating-linear-gradient(90deg,transparent 0 calc(var(--w) - 1px),#bfe5d1 calc(var(--w) - 1px) var(--w))}
+.seat b{display:flex;align-items:center;gap:1px;white-space:nowrap}
+.seat .ic{font-style:normal;font-size:.8em}
 .seat.guest{border-style:dashed;border-width:2px}
 .seat.empty{background:transparent;border-style:dashed;cursor:default}
 .over{margin-top:18px;padding:12px 14px;border-radius:14px;background:#fff8e6;border:1px solid #f1d58a;font-size:14px}
@@ -138,6 +140,7 @@ async function load() {
 // รายการที่มาหลายคนนั่งติดกันในแถวเดียว ถ้าแถวนั้นเหลือที่ไม่พอจะขึ้นแถวใหม่
 // ถ้าฝั่งไหนเก้าอี้ไม่พอ คนที่เหลือจะไปนั่งที่ว่างของอีกฝั่ง (ต่อท้ายแถวหลัง)
 const SKIP = "ไม่ต้องขึ้น";
+const ICON = { "เจ้าสาว": "👰", "เจ้าบ่าว": "🤵" };
 const other = s => s === SIDES[0] ? SIDES[1] : SIDES[0];
 function fill(area, list) {
   const { rows, cols } = layout[area.side], left = [];
@@ -189,7 +192,7 @@ function render() {
       return `<div class="row" style="grid-template-columns:repeat(${cols},1fr)">${mine.map(p => `
         <button class="seat ${p.g.arrived_at ? "in" : ""} ${p.n > 1 ? "multi" : ""} ${p.g.side !== area ? "guest" : ""}" data-id="${p.g.id}" data-s="${esc(p.g.side)}"
           style="grid-column:${colStart(area, cols, p.off, p.n)} / span ${p.n};--w:calc(100% / ${p.n})">
-          <b>${p.g.seq}</b><span>${esc(label(p.g.name))}</span>${p.n > 1 ? `<small>${p.n} ที่</small>` : ""}</button>`).join("")}
+          <b><i class="ic">${ICON[p.g.side]}</i>${p.g.seq}</b><span>${esc(label(p.g.name))}</span>${p.n > 1 ? `<small>${p.n} ที่</small>` : ""}</button>`).join("")}
         ${empties.map(c => `<div class="seat empty" style="grid-column:${c}"></div>`).join("")}</div>`;
     }).join("");
     return `<div class="side" data-s="${esc(area)}">
@@ -221,7 +224,7 @@ function renderList(P) {
     .sort((a, b) => SIDES.indexOf(a.side) - SIDES.indexOf(b.side) || a.seq - b.seq);
   $("plist").innerHTML = rows.length ? rows.map(g => `
     <button class="pg" data-s="${esc(g.side)}" data-go="${g.id}">
-      <div class="t"><div>${esc(g.name)}</div><small>ฝั่ง${esc(g.side)} ${g.seq}${g.relation ? " · " + esc(g.relation) : ""}${g.seats > 1 ? ` · ${g.seats} คน` : ""}</small></div>
+      <div class="t"><div>${esc(g.name)}</div><small>${ICON[g.side]} ฝั่ง${esc(g.side)} ${g.seq}${g.relation ? " · " + esc(g.relation) : ""}${g.seats > 1 ? ` · ${g.seats} คน` : ""}</small></div>
       ${(ps => `<div class="pos">${ps.length ? posStr(ps) : "ยังไม่มีที่นั่ง"}<small>${ps.length ? areaName(ps[0].area) : ""} · นับจากทางเดินกลาง</small></div>`)(posOf(P, g))}
     </button>`).join("") : `<p class="empty">${guests.some(g => g.arrived_at) ? "ไม่พบรายชื่อ" : "ยังไม่มีใครเช็คชื่อว่ามาแล้ว"}</p>`;
 }
